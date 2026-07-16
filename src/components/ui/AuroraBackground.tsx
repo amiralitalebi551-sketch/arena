@@ -193,7 +193,7 @@ export function AuroraBackground() {
     <canvas
       ref={ref}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 h-full w-full"
+      className="pointer-events-none fixed inset-0 z-0 h-full w-full opacity-80"
     />
   );
 }

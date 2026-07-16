@@ -26,7 +26,7 @@ export default function Home() {
       <ScrollProgress />
       <ScrollVelocityProvider />
       <Navigation />
-      <main id="main">
+      <main id="main" className="relative z-10">
         <Hero />
         <TrustBar />
         <SectionTransition>

@@ -57,14 +57,14 @@ html {
 }
 
 html {
-  /* رنگ پایه روی html تا در نبود WebGL پس‌زمینه‌ی تیره‌ی مطمئن داشته باشیم */
+  /* رنگ پایه‌ی تیره‌ی قطعی روی html */
   background-color: #0c0d0c;
 }
 
 body {
   @apply text-ink antialiased;
-  /* شفاف تا پس‌زمینه‌ی زنده‌ی aurora از پشت دیده شود */
-  background-color: transparent;
+  /* پس‌زمینه‌ی تیره‌ی مطمئن — هرگز سفید نمی‌شود حتی اگر aurora/WebGL لود نشود */
+  background-color: #0c0d0c;
   overflow-x: hidden;
 }
 

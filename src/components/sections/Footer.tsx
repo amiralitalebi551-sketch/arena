@@ -15,7 +15,7 @@ export function Footer() {
   const companyHrefs = ["#work", "#work", "#faq", `mailto:${EMAIL}`];
 
   return (
-    <footer className="border-t border-white/[0.07] bg-base-900">
+    <footer className="relative z-10 border-t border-white/[0.07] bg-base-900">
       <div className="container-content py-16">
         <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
