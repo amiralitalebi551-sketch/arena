@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+body {
+  @apply bg-base-900 text-ink font-body antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(109, 94, 246, 0.35);
+  color: #fff;
+}
+
+/* Focus visibility for keyboard users */
+:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@layer components {
+  .container-content {
+    @apply mx-auto w-full max-w-content px-5 sm:px-8;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-accent;
+  }
+  .heading-xl {
+    @apply font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl;
+  }
+  .heading-lg {
+    @apply font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl;
+  }
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-400 via-accent-400 to-warm bg-clip-text text-transparent;
+  }
+  .card {
+    @apply rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6 transition-colors duration-300;
+  }
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
