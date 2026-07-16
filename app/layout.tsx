@@ -81,6 +81,35 @@ export default function RootLayout({
       dir="rtl"
       className={`${display.variable} ${body.variable} ${farsi.variable}`}
     >
+      <head>
+        {/*
+          هدرهای امنیتی که از طریق <meta> روی هاست استاتیک کار می‌کنند.
+          CSP با نیازهای واقعی اپ سازگار است:
+          - 'unsafe-inline' برای style: Framer Motion و Tailwind استایل درون‌خطی تزریق می‌کنند.
+          - 'unsafe-inline' برای script: به‌خاطر اسکریپت‌های hydration و JSON-LD درون‌خطی Next.
+          - data:/blob: برای بافت‌ها و بوم‌های WebGL.
+          هدرهای قوی‌تر مثل HSTS و X-Frame-Options از طریق _headers/vercel.json ست می‌شوند.
+        */}
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content={[
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline'",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: blob:",
+            "font-src 'self' data:",
+            "connect-src 'self'",
+            "worker-src 'self' blob:",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'",
+            "upgrade-insecure-requests",
+          ].join("; ")}
+        />
+        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+      </head>
       <body>
         <a
           href="#main"
@@ -95,7 +124,14 @@ export default function RootLayout({
         <InteractionLayer />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          // دفاع عمقی: کاراکترهای حساس را escape می‌کنیم تا حتی با محتوای
+          // آینده از منابع خارجی، امکان شکستن تگ <script> (XSS) نباشد.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd)
+              .replace(/</g, "\\u003c")
+              .replace(/>/g, "\\u003e")
+              .replace(/&/g, "\\u0026"),
+          }}
         />
       </body>
     </html>

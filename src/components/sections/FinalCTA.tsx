@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { site } from "@/data/site";
+import { validateEmail } from "@/lib/validation";
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -11,15 +12,16 @@ export function FinalCTA() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string>("");
 
-  const validate = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate(email)) {
-      setError("لطفاً یک ایمیل معتبر وارد کنید.");
+    const result = validateEmail(email);
+    if (!result.valid) {
+      setError(result.error ?? "لطفاً یک ایمیل معتبر وارد کنید.");
       setStatus("error");
       return;
     }
+    // از مقدار trim‌شده و اعتبارسنجی‌شده استفاده می‌کنیم
+    setEmail(result.value);
     setError("");
     setStatus("loading");
     try {
@@ -83,6 +85,8 @@ export function FinalCTA() {
                       type="email"
                       inputMode="email"
                       autoComplete="email"
+                      maxLength={254}
+                      required
                       dir="ltr"
                       placeholder="you@company.com"
                       value={email}

@@ -4,9 +4,15 @@
 /build
 .DS_Store
 *.pem
+*.key
+*.p12
 npm-debug.log*
-.env*.local
+# همه‌ی فایل‌های env به‌جز نمونه (.env.example) نادیده گرفته می‌شوند
 .env
+.env.*
+!.env.example
+credentials.json
+secrets.json
 next-env.d.ts
 .vercel
 *.tsbuildinfo

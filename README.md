@@ -191,6 +191,33 @@ No stock images, models, or textures are used — every visual is procedural or 
 
 ---
 
+## 🔒 امنیت (Security Hardening)
+
+این پروژه یک سایت **کاملاً استاتیک** است (`output: 'export'`) — بدون بک‌اند،
+API، دیتابیس، احراز هویت یا session — بنابراین بخش بزرگی از سطح حمله وجود ندارد.
+اقدامات امنیتی اعمال‌شده:
+
+- **هدرهای امنیتی HTTP:** `Content-Security-Policy`، `Strict-Transport-Security`
+  (HSTS)، `X-Frame-Options: DENY`، `X-Content-Type-Options: nosniff`،
+  `Referrer-Policy`، `Permissions-Policy` و `COOP` — از طریق `public/_headers`
+  (Netlify/Cloudflare) و `vercel.json` (Vercel)، به‌علاوه‌ی `<meta>` برای CSP روی
+  هاست‌های استاتیک.
+- **CSP:** `default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`,
+  `base-uri 'self'`, `upgrade-insecure-requests`. نکته: `style-src`/`script-src`
+  شامل `'unsafe-inline'` است چون Framer Motion و Tailwind استایل درون‌خطی و Next
+  اسکریپت hydration درون‌خطی تزریق می‌کنند (trade-off شناخته‌شده).
+- **XSS:** خروجی JSON-LD قبل از تزریق escape می‌شود (دفاع عمقی). React به‌صورت
+  پیش‌فرض تمام خروجی‌ها را escape می‌کند.
+- **Reverse tabnabbing:** تمام لینک‌های `target="_blank"` دارای
+  `rel="noopener noreferrer"` هستند.
+- **اعتبارسنجی ورودی:** فرم ایمیل با `src/lib/validation.ts` (trim، محدودیت طول
+  ۲۵۴، regex بدون backtracking فاجعه‌بار) اعتبارسنجی می‌شود. **هنگام اتصال به
+  API واقعی، اعتبارسنجی سمت سرور نیز الزامی است.**
+- **مدیریت Secret:** هیچ secret هاردکد نیست؛ `.env` در `.gitignore` است و هرگز
+  commit نشده. فقط `.env.example` (بدون مقدار واقعی) در ریپو است.
+- **Dependencyها:** به آخرین patch امن خط Next.js 14 ارتقا یافت و `glob`/`postcss`
+  به نسخه‌های امن رسیدند. برای وضعیت به‌روز: `npm audit`.
+
 ## ☁️ Deployment
 
 Optimized for **Vercel**:
