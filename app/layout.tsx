@@ -23,7 +23,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // زبان/جهت واقعی در سطح [locale] روی <html> ست می‌شود؛ اینجا پیش‌فرض فارسی.
+  // CSP فقط در production فعال می‌شود. در حالت dev، Next.js برای hot-reload به
+  // 'unsafe-eval' نیاز دارد؛ اگر CSP آن را ببندد، جاوااسکریپت اجرا نمی‌شود و
+  // صفحه سفید می‌ماند. هدرهای امنیتی واقعی (شامل frame-ancestors و HSTS) از
+  // طریق public/_headers و vercel.json روی هاست اعمال می‌شوند.
+  const isProd = process.env.NODE_ENV === "production";
+
   return (
     <html
       lang="fa"
@@ -32,23 +37,24 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <meta
-          httpEquiv="Content-Security-Policy"
-          content={[
-            "default-src 'self'",
-            "script-src 'self' 'unsafe-inline'",
-            "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: blob:",
-            "font-src 'self' data:",
-            "connect-src 'self'",
-            "worker-src 'self' blob:",
-            "object-src 'none'",
-            "base-uri 'self'",
-            "form-action 'self'",
-            "frame-ancestors 'none'",
-            "upgrade-insecure-requests",
-          ].join("; ")}
-        />
+        {isProd && (
+          <meta
+            httpEquiv="Content-Security-Policy"
+            content={[
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob:",
+              "font-src 'self' data:",
+              "connect-src 'self'",
+              "worker-src 'self' blob:",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "upgrade-insecure-requests",
+            ].join("; ")}
+          />
+        )}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
       </head>
