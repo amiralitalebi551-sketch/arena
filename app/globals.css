@@ -57,14 +57,15 @@ html {
 }
 
 html {
-  /* رنگ پایه‌ی تیره‌ی قطعی روی html */
+  /* رنگ پایه‌ی تیره‌ی قطعی روی html — همیشه پشت همه‌چیز، هرگز سفید نمی‌شود */
   background-color: #0c0d0c;
 }
 
 body {
   @apply text-ink antialiased;
-  /* پس‌زمینه‌ی تیره‌ی مطمئن — هرگز سفید نمی‌شود حتی اگر aurora/WebGL لود نشود */
-  background-color: #0c0d0c;
+  /* شفاف تا aurora (که با -z-10 پشت body است) دیده شود.
+     چون html تیره است، اگر aurora هم نباشد پس‌زمینه تیره می‌ماند. */
+  background-color: transparent;
   overflow-x: hidden;
 }
 
