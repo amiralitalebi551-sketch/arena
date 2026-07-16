@@ -56,11 +56,11 @@ export function Features() {
       <div className="grid-bg absolute inset-0" aria-hidden="true" />
       <div className="container-content relative">
         <Reveal className="mx-auto mb-16 max-w-2xl text-center">
-          <p className="eyebrow mb-5">The roster</p>
-          <h2 className="heading-lg mb-4">Specialists, not a single generalist.</h2>
+          <p className="eyebrow mb-5">مجموعه‌ی ایجنت‌ها</p>
+          <h2 className="heading-lg mb-4">متخصص‌ها، نه یک مدل همه‌کاره.</h2>
           <p className="text-ink-soft">
-            Each agent masters one craft and shares the same brand memory — so
-            the work is deep, consistent, and unmistakably yours.
+            هر ایجنت در یک تخصص استاد است و از همان حافظه‌ی برند استفاده می‌کند —
+            پس کار عمیق، یکدست و بی‌شک متعلق به شماست.
           </p>
         </Reveal>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

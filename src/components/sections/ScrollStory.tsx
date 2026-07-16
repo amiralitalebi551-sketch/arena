@@ -6,20 +6,20 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 
 const beats = [
   {
-    title: "Load your brand memory",
-    body: "Guidelines, past work, and tone become a shared source of truth every agent reads from.",
+    title: "حافظه‌ی برندت را بارگذاری کن",
+    body: "گایدلاین، نمونه‌کارها و لحن به یک منبع حقیقت مشترک تبدیل می‌شوند که هر ایجنت از آن می‌خواند.",
   },
   {
-    title: "The Conductor plans",
-    body: "One brief is decomposed into tasks and routed to the right specialist — like a creative director assigning the room.",
+    title: "رهبر ارکستر برنامه می‌ریزد",
+    body: "یک بریف به وظایف شکسته و به متخصص درست سپرده می‌شود — مثل یک مدیر خلاق که کار را در اتاق تقسیم می‌کند.",
   },
   {
-    title: "Agents refine each other",
-    body: "Draft, critique, revise. Craft compounds as specialists challenge and sharpen the work.",
+    title: "ایجنت‌ها همدیگر را اصلاح می‌کنند",
+    body: "پیش‌نویس، نقد، بازنگری. کیفیت انباشته می‌شود، چون متخصص‌ها کار را به چالش می‌کشند و تیزتر می‌کنند.",
   },
   {
-    title: "Ship, perfectly on brand",
-    body: "Production-ready strategy, copy, and visual systems — consistent from first pixel to last.",
+    title: "منطبق با برند تحویل بده",
+    body: "استراتژی، کپی و سیستم‌های بصری آماده‌ی انتشار — یکدست از اولین پیکسل تا آخرین.",
   },
 ];
 
@@ -45,7 +45,7 @@ export function ScrollStory() {
       ref={ref}
       className="relative"
       style={{ height: reduced ? "auto" : "320vh" }}
-      aria-label="How FarBoo works"
+      aria-label="نحوه کار فربو"
     >
       <div
         className={
@@ -87,9 +87,9 @@ export function ScrollStory() {
           {/* Text beats */}
           <div className="order-1 space-y-8 lg:order-2">
             <Reveal>
-              <p className="eyebrow mb-4">How it works</p>
+              <p className="eyebrow mb-4">نحوه کار</p>
               <h2 className="heading-lg">
-                One brief in. A full studio&apos;s output out.
+                یک بریف بده. خروجی یک استودیوی کامل بگیر.
               </h2>
             </Reveal>
             <ol className="space-y-6">

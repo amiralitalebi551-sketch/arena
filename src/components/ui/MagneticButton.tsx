@@ -59,9 +59,9 @@ export function MagneticButton({
       {variant === "primary" && !loading && (
         <span
           aria-hidden="true"
-          className="transition-transform duration-300 group-hover:translate-x-1"
+          className="transition-transform duration-300 group-hover:-translate-x-1"
         >
-          →
+          ←
         </span>
       )}
     </>

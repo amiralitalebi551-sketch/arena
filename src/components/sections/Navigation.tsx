@@ -25,7 +25,7 @@ export function Navigation() {
     >
       <nav
         className="container-content flex h-16 items-center justify-between"
-        aria-label="Main"
+        aria-label="ناوبری اصلی"
       >
         <a href="#main" className="flex items-center gap-2 font-display text-lg font-semibold">
           <span
@@ -68,10 +68,10 @@ export function Navigation() {
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 md:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
-          aria-label={open ? "Close menu" : "Open menu"}
+          aria-label={open ? "بستن منو" : "باز کردن منو"}
           onClick={() => setOpen((o) => !o)}
         >
-          <span className="sr-only">Menu</span>
+          <span className="sr-only">منو</span>
           <div className="space-y-1.5">
             <span
               className={cn(

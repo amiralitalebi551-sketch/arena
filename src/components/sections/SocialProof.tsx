@@ -6,8 +6,8 @@ export function SocialProof() {
     <section id="work" className="relative border-y border-white/[0.06] bg-base-800/30 py-24 sm:py-32">
       <div className="container-content">
         <Reveal className="mb-12 text-center">
-          <p className="text-sm uppercase tracking-[0.2em] text-ink-faint">
-            Trusted by brand &amp; media teams
+          <p className="text-sm text-ink-faint">
+            مورد اعتماد تیم‌های برند و مدیا
           </p>
         </Reveal>
 

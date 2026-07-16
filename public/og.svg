@@ -12,11 +12,11 @@
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="#0A0B14"/>
-  <circle cx="930" cy="315" r="230" fill="url(#core)" opacity="0.85"/>
-  <circle cx="930" cy="315" r="250" fill="none" stroke="#6D5EF6" stroke-opacity="0.35"/>
-  <circle cx="930" cy="315" r="300" fill="none" stroke="#22D3EE" stroke-opacity="0.15"/>
-  <text x="90" y="250" font-family="Space Grotesk, sans-serif" font-size="42" fill="#22D3EE" letter-spacing="6">FARBOO</text>
-  <text x="88" y="330" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="72" fill="#E7E9F2">Intelligence,</text>
-  <text x="88" y="410" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="72" fill="url(#txt)">Orchestrated.</text>
-  <text x="90" y="480" font-family="Inter, sans-serif" font-size="28" fill="#9AA0B5">Specialized AI agent teams for media &amp; branding.</text>
+  <circle cx="270" cy="315" r="230" fill="url(#core)" opacity="0.85"/>
+  <circle cx="270" cy="315" r="250" fill="none" stroke="#6D5EF6" stroke-opacity="0.35"/>
+  <circle cx="270" cy="315" r="300" fill="none" stroke="#22D3EE" stroke-opacity="0.15"/>
+  <text x="1110" y="250" text-anchor="end" font-family="Tahoma, sans-serif" font-size="40" fill="#22D3EE">فَربو</text>
+  <text x="1110" y="335" text-anchor="end" font-family="Tahoma, sans-serif" font-weight="700" font-size="66" fill="#E7E9F2">هوش،</text>
+  <text x="1110" y="415" text-anchor="end" font-family="Tahoma, sans-serif" font-weight="700" font-size="66" fill="url(#txt)">هماهنگ‌شده.</text>
+  <text x="1110" y="480" text-anchor="end" font-family="Tahoma, sans-serif" font-size="26" fill="#9AA0B5">تیم‌های تخصصی مولتی‌ایجنت برای مدیا و برندینگ</text>
 </svg>

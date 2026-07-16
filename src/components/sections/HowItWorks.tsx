@@ -6,8 +6,8 @@ export function HowItWorks() {
     <section className="relative py-24 sm:py-32">
       <div className="container-content">
         <Reveal className="mb-16 max-w-2xl">
-          <p className="eyebrow mb-5">Getting started</p>
-          <h2 className="heading-lg">Live in an afternoon, not a quarter.</h2>
+          <p className="eyebrow mb-5">شروع کار</p>
+          <h2 className="heading-lg">در یک بعدازظهر راه‌اندازی، نه یک فصل.</h2>
         </Reveal>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((s, i) => (

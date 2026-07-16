@@ -13,8 +13,8 @@ export function FAQ() {
     <section id="faq" className="relative py-24 sm:py-32">
       <div className="container-content max-w-3xl">
         <Reveal className="mb-14 text-center">
-          <p className="eyebrow mb-5">FAQ</p>
-          <h2 className="heading-lg">Answers before you ask.</h2>
+          <p className="eyebrow mb-5">سوالات پرتکرار</p>
+          <h2 className="heading-lg">پاسخ‌ها، پیش از اینکه بپرسی.</h2>
         </Reveal>
 
         <dl className="divide-y divide-white/[0.07] border-y border-white/[0.07]">

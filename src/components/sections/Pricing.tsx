@@ -8,10 +8,10 @@ export function Pricing() {
     <section id="pricing" className="relative py-24 sm:py-32">
       <div className="container-content">
         <Reveal className="mx-auto mb-16 max-w-2xl text-center">
-          <p className="eyebrow mb-5">Pricing</p>
-          <h2 className="heading-lg mb-4">Start small. Scale to a full studio.</h2>
+          <p className="eyebrow mb-5">قیمت‌گذاری</p>
+          <h2 className="heading-lg mb-4">کوچک شروع کن. تا یک استودیوی کامل رشد کن.</h2>
           <p className="text-ink-soft">
-            Simple plans that grow with your work. No seats to count, no lock-in.
+            پلن‌های ساده که همراه کار تو رشد می‌کنند. نه شمردن صندلی، نه قفل قرارداد.
           </p>
         </Reveal>
 
@@ -28,7 +28,7 @@ export function Pricing() {
               >
                 {p.highlight && (
                   <span className="absolute -top-3 left-8 rounded-full bg-primary px-3 py-1 text-xs font-medium text-white">
-                    Most popular
+                    محبوب‌ترین
                   </span>
                 )}
                 <h3 className="font-display text-xl font-semibold">{p.name}</h3>

@@ -10,7 +10,7 @@ function Block({
 }) {
   return (
     <Reveal className={tone === "bright" ? "card border-primary/20 bg-primary/[0.04]" : "card"}>
-      <p className={tone === "bright" ? "eyebrow mb-5" : "mb-5 inline-flex rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-ink-soft"}>
+      <p className={tone === "bright" ? "eyebrow mb-5" : "mb-5 inline-flex rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium text-ink-soft"}>
         {data.eyebrow}
       </p>
       <h3 className="heading-lg mb-4 text-2xl sm:text-3xl">{data.title}</h3>
@@ -39,9 +39,9 @@ export function ProblemSolution() {
     <section className="relative py-24 sm:py-32">
       <div className="container-content">
         <Reveal className="mx-auto mb-16 max-w-2xl text-center">
-          <p className="eyebrow mb-5">Why FarBoo</p>
+          <p className="eyebrow mb-5">چرا فربو</p>
           <h2 className="heading-lg">
-            The gap between a brilliant idea and brilliant execution.
+            فاصله‌ی میان یک ایده‌ی درخشان و اجرای درخشان.
           </h2>
         </Reveal>
         <div className="grid gap-6 md:grid-cols-2">

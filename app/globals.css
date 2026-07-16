@@ -28,8 +28,17 @@ html {
 }
 
 body {
-  @apply bg-base-900 text-ink font-body antialiased;
+  /* فونت فارسی (Vazirmatn) به‌عنوان فونت اصلی کل رابط کاربری */
+  @apply bg-base-900 text-ink antialiased;
+  font-family: var(--font-farsi), var(--font-body), system-ui, sans-serif;
   overflow-x: hidden;
+}
+
+/* روی دسکتاپ کرسر پیش‌فرض را کم‌رنگ می‌کنیم تا دنباله‌ی نورانی بدرخشد */
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: default;
+  }
 }
 
 ::selection {
@@ -48,20 +57,91 @@ body {
   .container-content {
     @apply mx-auto w-full max-w-content px-5 sm:px-8;
   }
+  /* برای فارسی از uppercase/tracking استفاده نمی‌کنیم */
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-accent;
+    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium text-accent;
   }
   .heading-xl {
-    @apply font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl;
+    /* برای فارسی از فونت فارسی و line-height مناسب استفاده می‌کنیم */
+    font-family: var(--font-farsi), var(--font-display), sans-serif;
+    @apply text-4xl font-bold leading-[1.25] sm:text-5xl md:text-6xl;
   }
   .heading-lg {
-    @apply font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl;
+    font-family: var(--font-farsi), var(--font-display), sans-serif;
+    @apply text-3xl font-bold leading-[1.35] sm:text-4xl;
+  }
+  .font-display {
+    font-family: var(--font-farsi), var(--font-display), sans-serif;
   }
   .text-gradient {
-    @apply bg-gradient-to-r from-primary-400 via-accent-400 to-warm bg-clip-text text-transparent;
+    @apply bg-gradient-to-l from-primary-400 via-accent-400 to-warm bg-clip-text text-transparent;
+  }
+  /* گرادیان متحرک برای تیترهای برجسته */
+  .text-gradient-animated {
+    background: linear-gradient(
+      110deg,
+      #8b7ff9,
+      #4fddf2,
+      #f5a97f,
+      #8b7ff9
+    );
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-shift 6s ease infinite;
   }
   .card {
-    @apply rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6 transition-colors duration-300;
+    @apply rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6 transition-all duration-300;
+  }
+  .card:hover {
+    @apply -translate-y-1 border-white/15;
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+
+@keyframes aurora {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(4%, -3%) scale(1.15);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-float-slow {
+    animation: float-slow 7s ease-in-out infinite;
+  }
+  .animate-aurora {
+    animation: aurora 14s ease-in-out infinite;
   }
 }
 
@@ -71,4 +151,9 @@ body {
     linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* نوار پیشرفت اسکرول بالای صفحه */
+.scroll-progress {
+  transform-origin: right; /* RTL */
 }

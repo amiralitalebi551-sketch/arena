@@ -1,183 +1,183 @@
 export const stats = [
-  { value: "12", suffix: "+", label: "Specialized agents" },
-  { value: "3.4", suffix: "x", label: "Faster to first draft" },
-  { value: "98", suffix: "%", label: "On-brand consistency" },
-  { value: "40", suffix: "hrs", label: "Saved per campaign" },
+  { value: "۱۲", suffix: "+", label: "ایجنت تخصصی", num: 12, plus: "+" },
+  { value: "۳٫۴", suffix: "x", label: "سریع‌تر تا اولین پیش‌نویس", num: 3.4, plus: "x" },
+  { value: "۹۸", suffix: "٪", label: "هماهنگی با هویت برند", num: 98, plus: "٪" },
+  { value: "۴۰", suffix: " ساعت", label: "صرفه‌جویی در هر کمپین", num: 40, plus: " ساعت" },
 ];
 
 export const clients = [
-  "NOVENA",
-  "Halcyon",
-  "Vireo",
-  "Northbound",
-  "Cadence",
-  "Aпертура",
-].map((n) => n.normalize());
+  "نووِنا",
+  "هالسیون",
+  "ویریو",
+  "نورث‌باند",
+  "کِیدنس",
+  "آپِرتورا",
+];
 
 export const problem = {
-  eyebrow: "The bottleneck",
-  title: "Great brands stall between the idea and the execution.",
-  body: "Generic AI gives you fast, forgettable output. Human studios give you craft — at studio timelines and studio prices. Media and branding teams are stuck choosing between speed and soul.",
+  eyebrow: "گلوگاه",
+  title: "برندهای بزرگ بین ایده و اجرا گیر می‌کنند.",
+  body: "هوش مصنوعی عمومی خروجی سریع اما بی‌روح می‌دهد. استودیوهای انسانی کیفیت می‌دهند — اما با زمان و هزینه‌ی استودیویی. تیم‌های مدیا و برندینگ مجبورند بین سرعت و اصالت یکی را انتخاب کنند.",
   points: [
-    "One general-purpose model can't hold voice, strategy, and craft at once.",
-    "Hand-offs between freelancers leak context and burn weeks.",
-    "Every new campaign restarts brand knowledge from zero.",
+    "یک مدل عمومی نمی‌تواند هم‌زمان لحن، استراتژی و کیفیت را حفظ کند.",
+    "رد و بدل کار بین فریلنسرها زمینه را از بین می‌برد و هفته‌ها وقت می‌گیرد.",
+    "هر کمپین جدید، دانش برند را از صفر شروع می‌کند.",
   ],
 };
 
 export const solution = {
-  eyebrow: "The FarBoo way",
-  title: "A team of specialists, not a single generalist.",
-  body: "FarBoo orchestrates a roster of focused agents — each fine-tuned for one discipline and grounded in your brand memory. They plan, critique, and hand off to one another like a real studio, so you get depth and speed at the same time.",
+  eyebrow: "روش فربو",
+  title: "یک تیم از متخصص‌ها، نه یک مدل همه‌کاره.",
+  body: "فربو مجموعه‌ای از ایجنت‌های متمرکز را هماهنگ می‌کند — هرکدام برای یک تخصص آموزش دیده و به حافظه‌ی برند شما متصل است. آن‌ها مثل یک استودیوی واقعی برنامه‌ریزی می‌کنند، نقد می‌کنند و کار را به هم تحویل می‌دهند؛ پس هم‌زمان عمق و سرعت می‌گیرید.",
   points: [
-    "Persistent brand memory keeps voice and rules consistent across every deliverable.",
-    "A conductor agent routes work to the right specialist and reviews the result.",
-    "You stay in the loop with clear checkpoints, never a black box.",
+    "حافظه‌ی دائمی برند، لحن و قواعد را در تمام خروجی‌ها یکدست نگه می‌دارد.",
+    "یک ایجنت رهبر، کار را به متخصص درست می‌سپارد و نتیجه را بازبینی می‌کند.",
+    "شما همیشه در جریان هستید با نقاط بازبینی شفاف، نه یک جعبه‌ی سیاه.",
   ],
 };
 
 export const features = [
   {
-    title: "Strategy Agent",
-    desc: "Positioning, audience maps, and messaging pillars grounded in real market signal — not guesses.",
+    title: "ایجنت استراتژی",
+    desc: "جایگاه‌یابی، نقشه‌ی مخاطب و ستون‌های پیام‌رسانی بر پایه‌ی سیگنال واقعی بازار — نه حدس و گمان.",
     icon: "compass",
   },
   {
-    title: "Voice & Copy Agent",
-    desc: "Long-form and micro-copy that holds your tone across channels, from manifestos to CTAs.",
+    title: "ایجنت لحن و کپی",
+    desc: "متن بلند و کوتاه که لحن شما را در همه‌ی کانال‌ها حفظ می‌کند، از مانیفست تا دکمه‌های اکشن.",
     icon: "type",
   },
   {
-    title: "Art Direction Agent",
-    desc: "Moodboards, palettes, and layout systems that translate strategy into a coherent visual language.",
+    title: "ایجنت هنری",
+    desc: "مودبورد، پالت و سیستم‌های چیدمان که استراتژی را به یک زبان بصری منسجم تبدیل می‌کنند.",
     icon: "palette",
   },
   {
-    title: "Motion & 3D Agent",
-    desc: "Storyboards, easing, and shader-driven concepts for launch films and immersive web moments.",
+    title: "ایجنت موشن و سه‌بعدی",
+    desc: "استوری‌بورد، easing و ایده‌های شیدر-محور برای فیلم‌های لانچ و لحظه‌های وب ایمرسیو.",
     icon: "motion",
   },
   {
-    title: "Research Agent",
-    desc: "Continuous competitive and cultural scanning so your brand reacts before the trend, not after.",
+    title: "ایجنت پژوهش",
+    desc: "پایش مداوم رقبا و فرهنگ، تا برند شما پیش از ترند واکنش نشان دهد، نه بعد از آن.",
     icon: "search",
   },
   {
-    title: "Conductor",
-    desc: "The orchestrator that assigns tasks, resolves conflicts, and ships work that feels made by one mind.",
+    title: "رهبر ارکستر",
+    desc: "هماهنگ‌کننده‌ای که وظایف را تقسیم می‌کند، تعارض‌ها را حل می‌کند و کاری تحویل می‌دهد که انگار یک ذهن ساخته است.",
     icon: "network",
   },
 ];
 
 export const steps = [
   {
-    n: "01",
-    title: "Load your brand",
-    desc: "Drop in guidelines, past work, and tone. FarBoo builds a living brand memory the whole team shares.",
+    n: "۰۱",
+    title: "برندت را بارگذاری کن",
+    desc: "گایدلاین، نمونه‌کارها و لحن را وارد کن. فربو یک حافظه‌ی زنده‌ی برند می‌سازد که کل تیم از آن استفاده می‌کند.",
   },
   {
-    n: "02",
-    title: "Brief the team",
-    desc: "Describe the outcome in plain language. The Conductor breaks it into tasks and assigns specialists.",
+    n: "۰۲",
+    title: "به تیم بریف بده",
+    desc: "خروجی را ساده و به زبان خودت توضیح بده. رهبر ارکستر آن را به وظایف می‌شکند و به متخصص‌ها می‌سپارد.",
   },
   {
-    n: "03",
-    title: "Review in the loop",
-    desc: "Agents draft, critique, and refine each other. You approve at clear checkpoints and steer direction.",
+    n: "۰۳",
+    title: "در جریان بازبینی کن",
+    desc: "ایجنت‌ها پیش‌نویس می‌زنند، همدیگر را نقد و اصلاح می‌کنند. تو در نقاط مشخص تأیید و مسیر را هدایت می‌کنی.",
   },
   {
-    n: "04",
-    title: "Ship on brand",
-    desc: "Export production-ready strategy, copy, and visual systems — consistent from the first pixel to the last.",
+    n: "۰۴",
+    title: "منطبق با برند تحویل بگیر",
+    desc: "استراتژی، کپی و سیستم بصری آماده‌ی انتشار — یکدست از اولین پیکسل تا آخرین.",
   },
 ];
 
 export const testimonials = [
   {
     quote:
-      "It felt like hiring a senior studio overnight. The agents actually disagreed with each other and the final work was sharper for it.",
-    name: "Lena Marchetti",
-    role: "Brand Director, Novena",
+      "انگار یک‌شبه یک استودیوی حرفه‌ای استخدام کردیم. ایجنت‌ها واقعاً با هم مخالفت می‌کردند و خروجی نهایی به همین خاطر تیزتر شد.",
+    name: "لِنا مارکتی",
+    role: "مدیر برند، نووِنا",
   },
   {
     quote:
-      "We cut our campaign turnaround from six weeks to nine days without losing the craft. Our clients can't tell where the studio ends and FarBoo begins.",
-    name: "Darius Okonkwo",
-    role: "Founder, Halcyon Media",
+      "زمان تحویل کمپین‌مان را از شش هفته به نه روز رساندیم، بدون اینکه کیفیت را از دست بدهیم. مشتری‌ها اصلاً نمی‌فهمند کجا استودیو تمام و فربو شروع می‌شود.",
+    name: "داریوش اوکونکو",
+    role: "بنیان‌گذار، هالسیون مدیا",
   },
   {
     quote:
-      "The brand memory is the killer feature. Nothing drifts. Every asset sounds like us.",
-    name: "Priya Raman",
-    role: "Head of Content, Vireo",
+      "حافظه‌ی برند ویژگی نجات‌بخشی است. هیچ‌چیز از مسیر خارج نمی‌شود. هر خروجی صدای خودمان است.",
+    name: "پریا رامان",
+    role: "مدیر محتوا، ویریو",
   },
 ];
 
 export const pricing = [
   {
-    name: "Solo",
-    price: "$49",
-    period: "/mo",
-    tagline: "For independent specialists and freelancers.",
+    name: "فردی",
+    price: "۴۹$",
+    period: "/ماه",
+    tagline: "برای متخصص‌های مستقل و فریلنسرها.",
     features: [
-      "3 core agents",
-      "1 brand memory",
-      "Up to 40 tasks / month",
-      "Standard exports",
+      "۳ ایجنت اصلی",
+      "۱ حافظه‌ی برند",
+      "تا ۴۰ وظیفه در ماه",
+      "خروجی استاندارد",
     ],
-    cta: "Start solo",
+    cta: "شروع فردی",
     highlight: false,
   },
   {
-    name: "Studio",
-    price: "$199",
-    period: "/mo",
-    tagline: "For teams shipping brand work every week.",
+    name: "استودیو",
+    price: "۱۹۹$",
+    period: "/ماه",
+    tagline: "برای تیم‌هایی که هر هفته کار برند تحویل می‌دهند.",
     features: [
-      "Full 12-agent roster + Conductor",
-      "5 brand memories",
-      "Unlimited tasks",
-      "Priority rendering & 3D concepts",
-      "Shared review workspace",
+      "کل مجموعه‌ی ۱۲ ایجنت + رهبر ارکستر",
+      "۵ حافظه‌ی برند",
+      "وظایف نامحدود",
+      "رندر و ایده‌های سه‌بعدی با اولویت",
+      "فضای کار مشترک برای بازبینی",
     ],
-    cta: "Deploy the studio",
+    cta: "فعال‌سازی استودیو",
     highlight: true,
   },
   {
-    name: "Agency",
-    price: "Custom",
+    name: "آژانس",
+    price: "سفارشی",
     period: "",
-    tagline: "For agencies managing many client brands.",
+    tagline: "برای آژانس‌هایی که چند برند را مدیریت می‌کنند.",
     features: [
-      "Unlimited brand memories",
-      "Custom-trained agents",
-      "SSO & role controls",
-      "Dedicated success partner",
+      "حافظه‌ی برند نامحدود",
+      "ایجنت‌های آموزش‌دیده‌ی اختصاصی",
+      "ورود یکپارچه و کنترل نقش‌ها",
+      "کارشناس موفقیت اختصاصی",
     ],
-    cta: "Talk to us",
+    cta: "با ما صحبت کن",
     highlight: false,
   },
 ];
 
 export const faqs = [
   {
-    q: "How is FarBoo different from a single AI chatbot?",
-    a: "A chatbot is one generalist. FarBoo is a coordinated team of specialists, each tuned for a single craft and grounded in your brand memory, with a Conductor that routes work and reviews quality — the way a real studio operates.",
+    q: "فربو با یک چت‌بات هوش مصنوعی چه فرقی دارد؟",
+    a: "چت‌بات یک مدل همه‌کاره است. فربو یک تیم هماهنگ از متخصص‌هاست که هرکدام برای یک تخصص آموزش دیده و به حافظه‌ی برند شما متصل است، با یک رهبر ارکستر که کار را تقسیم و کیفیت را بازبینی می‌کند — درست مثل یک استودیوی واقعی.",
   },
   {
-    q: "Will the output actually stay on brand?",
-    a: "Yes. Every agent reads from the same persistent brand memory — your voice, palette, rules, and past work — so deliverables stay consistent across campaigns instead of drifting each time.",
+    q: "آیا خروجی واقعاً منطبق با برند می‌ماند؟",
+    a: "بله. هر ایجنت از همان حافظه‌ی دائمی برند می‌خواند — لحن، پالت، قواعد و نمونه‌کارهای گذشته — پس خروجی‌ها در همه‌ی کمپین‌ها یکدست می‌مانند و هر بار از مسیر خارج نمی‌شوند.",
   },
   {
-    q: "Do I lose creative control?",
-    a: "Never. You brief in plain language and approve at clear checkpoints. You can steer, reject, or refine any step; the agents adapt rather than run off on their own.",
+    q: "آیا کنترل خلاقانه‌ام را از دست می‌دهم؟",
+    a: "هرگز. تو به زبان ساده بریف می‌دهی و در نقاط مشخص تأیید می‌کنی. می‌توانی هر مرحله را هدایت، رد یا اصلاح کنی؛ ایجنت‌ها تطبیق می‌یابند، نه اینکه سرخود پیش بروند.",
   },
   {
-    q: "Who is FarBoo for?",
-    a: "Specialists who own real outcomes — brand directors, founders, content and design leads — who want studio-grade craft without studio timelines.",
+    q: "فربو برای چه کسانی است؟",
+    a: "برای متخصص‌هایی که مسئول نتایج واقعی هستند — مدیران برند، بنیان‌گذاران، مدیران محتوا و طراحی — که کیفیت استودیویی می‌خواهند بدون زمان‌بندی استودیویی.",
   },
   {
-    q: "Can I try it before committing?",
-    a: "The Solo plan is designed as a low-risk entry point, and Agency trials are available on request. No long-term lock-in.",
+    q: "می‌توانم قبل از تعهد امتحانش کنم؟",
+    a: "پلن فردی به‌عنوان یک نقطه‌ی ورود کم‌ریسک طراحی شده، و دوره‌ی آزمایشی آژانس هم در صورت درخواست موجود است. هیچ قفل بلندمدتی وجود ندارد.",
   },
 ];

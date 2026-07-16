@@ -16,13 +16,13 @@ export function FinalCTA() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate(email)) {
-      setError("Please enter a valid email address.");
+      setError("لطفاً یک ایمیل معتبر وارد کنید.");
       setStatus("error");
       return;
     }
     setError("");
     setStatus("loading");
-    // Simulated submission — wire to your CRM / API route in production.
+    // ارسال شبیه‌سازی‌شده — در نسخه‌ی واقعی به CRM / روت API خودت وصلش کن.
     await new Promise((r) => setTimeout(r, 1100));
     setStatus("success");
   };
@@ -33,20 +33,21 @@ export function FinalCTA() {
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/15 via-base-800 to-base-900 px-6 py-16 text-center sm:px-16">
             <div
-              className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-accent/20 blur-[100px]"
+              className="animate-aurora pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-accent/20 blur-[100px]"
               aria-hidden="true"
             />
             <div
-              className="pointer-events-none absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-primary/25 blur-[100px]"
+              className="animate-aurora pointer-events-none absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-primary/25 blur-[100px]"
+              style={{ animationDelay: "-7s" }}
               aria-hidden="true"
             />
             <div className="relative mx-auto max-w-2xl">
               <h2 className="heading-lg mb-4">
-                Deploy your agent team today.
+                همین امروز تیم ایجنت‌هایت را فعال کن.
               </h2>
               <p className="mb-8 text-ink-soft">
-                Give your brand a studio that never sleeps. Start free on Solo,
-                or book a walkthrough of the full roster.
+                به برندت یک استودیو بده که هرگز نمی‌خوابد. رایگان با پلن فردی
+                شروع کن، یا یک دموی کامل از مجموعه‌ی ایجنت‌ها رزرو کن.
               </p>
 
               {status === "success" ? (
@@ -54,8 +55,11 @@ export function FinalCTA() {
                   role="status"
                   className="mx-auto max-w-md rounded-2xl border border-accent/40 bg-accent/10 px-6 py-5 text-accent"
                 >
-                  You&apos;re on the list. We&apos;ll reach out at{" "}
-                  <span className="font-medium">{email}</span> shortly.
+                  ثبت شد! به‌زودی از طریق{" "}
+                  <span className="font-medium" dir="ltr">
+                    {email}
+                  </span>{" "}
+                  با شما تماس می‌گیریم.
                 </div>
               ) : (
                 <form
@@ -63,15 +67,16 @@ export function FinalCTA() {
                   noValidate
                   className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
                 >
-                  <div className="flex-1 text-left">
+                  <div className="flex-1 text-right">
                     <label htmlFor="cta-email" className="sr-only">
-                      Work email
+                      ایمیل کاری
                     </label>
                     <input
                       id="cta-email"
                       type="email"
                       inputMode="email"
                       autoComplete="email"
+                      dir="ltr"
                       placeholder="you@company.com"
                       value={email}
                       onChange={(e) => {
@@ -83,7 +88,7 @@ export function FinalCTA() {
                       className="w-full rounded-full border border-white/15 bg-white/[0.04] px-5 py-3.5 text-sm text-ink placeholder:text-ink-faint focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/40"
                     />
                     {status === "error" && (
-                      <p id="cta-error" className="mt-2 pl-4 text-sm text-warm">
+                      <p id="cta-error" className="mt-2 pr-4 text-sm text-warm">
                         {error}
                       </p>
                     )}
@@ -99,7 +104,7 @@ export function FinalCTA() {
                 </form>
               )}
               <p className="mt-4 text-xs text-ink-faint">
-                No credit card required · Cancel anytime
+                بدون نیاز به کارت بانکی · لغو در هر زمان
               </p>
             </div>
           </div>
