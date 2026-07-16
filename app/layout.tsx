@@ -3,6 +3,8 @@ import { display, body, farsi } from "@/lib/fonts";
 import { site } from "@/data/site";
 import { CursorTrail } from "@/components/ui/CursorTrail";
 import { AuroraBackground } from "@/components/ui/AuroraBackground";
+import { Preloader } from "@/components/ui/Preloader";
+import { InteractionLayer } from "@/components/ui/InteractionLayer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -86,9 +88,11 @@ export default function RootLayout({
         >
           پرش به محتوا
         </a>
+        <Preloader />
         <AuroraBackground />
         <CursorTrail />
         {children}
+        <InteractionLayer />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

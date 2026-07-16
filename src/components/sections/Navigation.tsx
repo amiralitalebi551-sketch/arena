@@ -57,7 +57,8 @@ export function Navigation() {
           </a>
           <a
             href={site.cta.primary.href}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-400"
+            data-magnetic="0.2"
+            className="inline-block rounded-full bg-primary px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-400"
           >
             {site.cta.primary.label}
           </a>

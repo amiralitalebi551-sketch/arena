@@ -105,7 +105,9 @@ export function AuroraBackground() {
     const uTime = gl.getUniformLocation(prog, "uTime");
     const uMouse = gl.getUniformLocation(prog, "uMouse");
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.25); // سبک نگه می‌داریم
+    // روی موبایل/صفحات کوچک DPR را ۱ می‌کنیم تا مصرف GPU پایین بماند
+    const isSmall = window.innerWidth < 768;
+    const dpr = isSmall ? 1 : Math.min(window.devicePixelRatio || 1, 1.25);
     const resize = () => {
       const w = Math.floor(window.innerWidth * dpr);
       const h = Math.floor(window.innerHeight * dpr);

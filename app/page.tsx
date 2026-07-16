@@ -11,6 +11,7 @@ import { FAQ } from "@/components/sections/FAQ";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/sections/Footer";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
+import { SectionTransition } from "@/components/ui/SectionTransition";
 
 export default function Home() {
   return (
@@ -20,14 +21,28 @@ export default function Home() {
       <main id="main">
         <Hero />
         <TrustBar />
-        <ProblemSolution />
-        <Features />
+        <SectionTransition>
+          <ProblemSolution />
+        </SectionTransition>
+        <SectionTransition>
+          <Features />
+        </SectionTransition>
         <ScrollStory />
-        <HowItWorks />
-        <SocialProof />
-        <Pricing />
-        <FAQ />
-        <FinalCTA />
+        <SectionTransition>
+          <HowItWorks />
+        </SectionTransition>
+        <SectionTransition>
+          <SocialProof />
+        </SectionTransition>
+        <SectionTransition>
+          <Pricing />
+        </SectionTransition>
+        <SectionTransition>
+          <FAQ />
+        </SectionTransition>
+        <SectionTransition>
+          <FinalCTA />
+        </SectionTransition>
       </main>
       <Footer />
     </>
