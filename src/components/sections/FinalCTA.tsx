@@ -37,7 +37,7 @@ export function FinalCTA() {
   const successMsg = t.finalCta.success.split("{email}");
 
   return (
-    <section id="final-cta" className="relative py-24 sm:py-32">
+    <section id="final-cta" className="relative py-section">
       <div className="container-content">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/15 via-base-800 to-base-900 px-6 py-16 text-center sm:px-16">

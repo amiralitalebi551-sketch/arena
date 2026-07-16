@@ -32,7 +32,7 @@ function Block({ data, tone }: { data: SectionData; tone: "muted" | "bright" }) 
 export function ProblemSolution() {
   const { t } = useI18n();
   return (
-    <section className="relative py-24 sm:py-32">
+    <section className="relative py-section">
       <div className="container-content">
         <div className="grid gap-6 md:grid-cols-2">
           <Block data={t.problem} tone="muted" />

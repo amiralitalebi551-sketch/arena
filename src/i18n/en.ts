@@ -86,6 +86,19 @@ export const en: Dictionary = {
     { n: "04", title: "Ship", desc: "Take the finished work and go." },
   ],
   socialHead: "Brands and media teams that work with FarBoo",
+  workHead: {
+    eyebrow: "Selected work",
+    title: "A few things the team has shipped.",
+    body: "From brand identity to launch campaigns — all from the same brand memory, at the same quality.",
+  },
+  work: [
+    { title: "Novena identity refresh", category: "Branding", span: 26 },
+    { title: "Halcyon launch campaign", category: "Campaign", span: 20 },
+    { title: "Vireo visual system", category: "Design system", span: 30 },
+    { title: "Northbound intro film", category: "Motion", span: 22 },
+    { title: "Cadence content strategy", category: "Strategy", span: 18 },
+    { title: "Apertura rebrand", category: "Branding", span: 28 },
+  ],
   testimonials: [
     { quote: "It felt like hiring a studio overnight. The interesting part was watching the agents disagree — the work got better for it.", name: "Lena Marchetti", role: "Brand Director, Novena" },
     { quote: "We went from six-week turnarounds to nine days without dropping quality. Clients can't tell where our work ends and FarBoo begins.", name: "Darius Okonkwo", role: "Founder, Halcyon Media" },

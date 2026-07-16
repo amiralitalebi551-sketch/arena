@@ -11,7 +11,7 @@ export function FAQ() {
   const reduced = useReducedMotion();
 
   return (
-    <section id="faq" className="relative py-24 sm:py-32">
+    <section id="faq" className="relative py-section">
       <div className="container-content max-w-3xl">
         <Reveal className="mb-14 text-center">
           <p className="eyebrow mb-5">{t.faqHead.eyebrow}</p>

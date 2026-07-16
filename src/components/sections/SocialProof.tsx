@@ -49,7 +49,7 @@ function TestimonialCard({
 export function SocialProof() {
   const { t } = useI18n();
   return (
-    <section id="work" className="relative border-y border-white/[0.06] bg-base-800/30 py-24 sm:py-32">
+    <section id="clients" className="relative border-y border-white/[0.06] bg-base-800/30 py-section">
       <div className="container-content">
         <Reveal className="mb-12 text-center">
           <p className="text-sm text-ink-faint">{t.socialHead}</p>

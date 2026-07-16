@@ -4,6 +4,35 @@
 
 :root {
   color-scheme: dark;
+
+  /* ── Design Tokens (منبع واحد) ──────────────────────────────
+     همه‌ی کامپوننت‌ها از این توکن‌ها می‌خوانند تا سیستم منسجم بماند
+     و مقدار hardcode پراکنده نداشته باشیم. */
+
+  /* رنگ (هماهنگ با tailwind.config) */
+  --c-base: #0c0d0c;
+  --c-primary: #1f9d6b;
+  --c-primary-400: #3fcf8e;
+  --c-accent: #3fcf8e;
+  --c-warm: #c9a96a;
+  --c-ink: #ede6d6;
+  --c-ink-soft: #a7a99c;
+
+  /* سایه‌ها — ملایم و لایه‌ای برای عمق ادراکی (نه سایه‌ی پیش‌فرض تخت) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 40px -8px rgba(31, 157, 107, 0.45);
+
+  /* شعاع گوشه */
+  --radius-card: 1rem;
+  --radius-pill: 9999px;
+
+  /* مدت‌زمان‌های حرکت — استاندارد واحد برای micro-interactionها.
+     ۱۲۰ms کف ادراک «پاسخ آنی» انسان است. */
+  --dur-fast: 120ms;
+  --dur-base: 240ms;
+  --dur-slow: 400ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -200,4 +229,16 @@ body {
 /* نوار پیشرفت اسکرول بالای صفحه */
 .scroll-progress {
   transform-origin: right; /* RTL */
+}
+
+/* Velocity-aware momentum: عناصر هنگام اسکرول سریع کمی در جهت حرکت کشیده
+   می‌شوند (حس فیزیکی/زنده). --scroll-vel از useScrollVelocity می‌آید.
+   فقط transform استفاده می‌شود (GPU) و در reduced-motion خنثی است. */
+@media (prefers-reduced-motion: no-preference) {
+  .vel-momentum {
+    transform: translateY(calc(var(--scroll-vel, 0) * -8px))
+      scaleY(calc(1 + (var(--scroll-vel, 0) * var(--scroll-vel, 0)) * 0.015));
+    transform-origin: center;
+    will-change: transform;
+  }
 }

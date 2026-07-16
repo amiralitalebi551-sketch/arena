@@ -56,7 +56,7 @@ function FeatureCard({
 export function Features() {
   const { t } = useI18n();
   return (
-    <section id="features" className="relative py-24 sm:py-32">
+    <section id="features" className="relative py-section">
       <div className="grid-bg absolute inset-0" aria-hidden="true" />
       <div className="container-content relative">
         <Reveal className="mx-auto mb-16 max-w-2xl text-center">

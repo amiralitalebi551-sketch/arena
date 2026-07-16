@@ -51,7 +51,7 @@ export function Navigation() {
         <div className="hidden items-center gap-3 md:flex">
           <Link
             href={switchHref}
-            className="flex h-8 items-center rounded-full border border-white/15 px-3 text-xs font-medium text-ink-soft transition-colors hover:border-primary/40 hover:text-ink"
+            className="flex h-9 min-w-9 items-center justify-center rounded-full border border-white/15 px-3.5 text-xs font-medium text-ink-soft transition-colors hover:border-primary/40 hover:text-ink"
             aria-label={otherLocale === "en" ? "Switch to English" : "تغییر به فارسی"}
           >
             {t.ui.switchTo}
@@ -89,10 +89,10 @@ export function Navigation() {
               </li>
             ))}
             <li className="mt-2 flex items-center gap-3">
-              <Link href={switchHref} onClick={() => setOpen(false)} className="flex h-10 flex-1 items-center justify-center rounded-full border border-white/15 text-sm text-ink-soft">
+              <Link href={switchHref} onClick={() => setOpen(false)} className="flex h-12 flex-1 items-center justify-center rounded-full border border-white/15 text-sm text-ink-soft">
                 {t.ui.switchTo}
               </Link>
-              <a href={t.cta.primary.href} onClick={() => setOpen(false)} className="flex h-10 flex-[2] items-center justify-center rounded-full bg-primary px-5 font-medium text-white">
+              <a href={t.cta.primary.href} onClick={() => setOpen(false)} className="flex h-12 flex-[2] items-center justify-center rounded-full bg-primary px-5 font-medium text-white">
                 {t.cta.primary.label}
               </a>
             </li>

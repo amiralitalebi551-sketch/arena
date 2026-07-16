@@ -40,6 +40,17 @@ const config: Config = {
       maxWidth: {
         content: "1200px",
       },
+      // مقیاس فاصله‌ی هدفمند بر پایه‌ی ریتم ۴px و پرش‌های هارمونیک.
+      // چرا؟ مقیاس منظم (نه اعداد دلخواه) به اصل Gestalt/Proximity کمک می‌کند:
+      // چشم گروه‌بندی عناصر مرتبط را راحت‌تر تشخیص می‌دهد.
+      spacing: {
+        "section": "clamp(5rem, 10vw, 8rem)", // فاصله‌ی عمودی سکشن‌ها (ریتم واحد)
+        "gutter": "clamp(1.25rem, 4vw, 2rem)", // حاشیه‌ی افقی صفحه
+      },
+      borderRadius: {
+        card: "1rem",
+        pill: "9999px",
+      },
       keyframes: {
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(16px)" },

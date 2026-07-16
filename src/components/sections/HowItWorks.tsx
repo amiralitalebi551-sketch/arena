@@ -5,7 +5,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 export function HowItWorks() {
   const { t } = useI18n();
   return (
-    <section className="relative py-24 sm:py-32">
+    <section className="relative py-section">
       <div className="container-content">
         <Reveal className="mb-16 max-w-2xl">
           <p className="eyebrow mb-5">{t.stepsHead.eyebrow}</p>

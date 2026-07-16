@@ -8,7 +8,7 @@ export function Pricing() {
   const { t, locale } = useI18n();
   const popular = locale === "fa" ? "محبوب‌ترین" : "Most popular";
   return (
-    <section id="pricing" className="relative py-24 sm:py-32">
+    <section id="pricing" className="relative py-section">
       <div className="container-content">
         <Reveal className="mx-auto mb-16 max-w-2xl text-center">
           <p className="eyebrow mb-5">{t.pricingHead.eyebrow}</p>

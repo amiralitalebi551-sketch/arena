@@ -49,6 +49,8 @@ export interface Dictionary {
   stepsHead: Head;
   steps: { n: string; title: string; desc: string }[];
   socialHead: string;
+  workHead: Head;
+  work: { title: string; category: string; span: number }[];
   testimonials: { quote: string; name: string; role: string }[];
   pricingHead: Head;
   pricing: {
