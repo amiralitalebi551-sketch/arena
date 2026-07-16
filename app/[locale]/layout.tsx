@@ -3,10 +3,6 @@ import { notFound } from "next/navigation";
 import { getDictionary, isLocale, locales, dirOf, type Locale } from "@/i18n";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { LocaleHtmlAttrs } from "@/components/ui/LocaleHtmlAttrs";
-import { CursorTrail } from "@/components/ui/CursorTrail";
-import { AuroraBackground } from "@/components/ui/AuroraBackground";
-import { Preloader } from "@/components/ui/Preloader";
-import { InteractionLayer } from "@/components/ui/InteractionLayer";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -89,16 +85,12 @@ export default function LocaleLayout({
       <LocaleHtmlAttrs locale={locale} dir={dir} />
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-base-900"
         style={dir === "rtl" ? { right: "1rem" } : { left: "1rem" }}
       >
         {t.ui.skip}
       </a>
-      <Preloader />
-      <AuroraBackground />
-      <CursorTrail />
       {children}
-      <InteractionLayer />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

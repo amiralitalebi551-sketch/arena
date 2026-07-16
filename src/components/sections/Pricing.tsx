@@ -1,6 +1,6 @@
 "use client";
 import { Reveal } from "@/components/ui/Reveal";
-import { MagneticButton } from "@/components/ui/MagneticButton";
+import { Button } from "@/components/ui/Button";
 import { useI18n } from "@/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 
@@ -47,9 +47,9 @@ export function Pricing() {
                   ))}
                 </ul>
                 <div className="mt-8">
-                  <MagneticButton href="#final-cta" variant={p.highlight ? "primary" : "secondary"} className="w-full" ariaLabel={`${p.cta} — ${p.name}`}>
+                  <Button href="#final-cta" variant={p.highlight ? "primary" : "secondary"} className="w-full" ariaLabel={`${p.cta} — ${p.name}`}>
                     {p.cta}
-                  </MagneticButton>
+                  </Button>
                 </div>
               </div>
             </Reveal>

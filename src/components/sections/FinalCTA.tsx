@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Reveal } from "@/components/ui/Reveal";
-import { MagneticButton } from "@/components/ui/MagneticButton";
+import { Button } from "@/components/ui/Button";
 import { validateEmail } from "@/lib/validation";
 import { useI18n } from "@/i18n/I18nProvider";
 
@@ -79,9 +79,9 @@ export function FinalCTA() {
                       <p id="cta-error" className="mt-2 text-sm text-warm" style={{ paddingInlineStart: "1rem" }}>{error}</p>
                     )}
                   </div>
-                  <MagneticButton variant="primary" type="submit" dir={dir} loading={status === "loading"} ariaLabel={t.finalCta.submitLabel}>
+                  <Button variant="primary" type="submit" loading={status === "loading"} ariaLabel={t.finalCta.submitLabel}>
                     {t.finalCta.submitLabel}
-                  </MagneticButton>
+                  </Button>
                 </form>
               )}
               <p className="mt-4 text-xs text-ink-faint">{t.finalCta.fineprint}</p>

@@ -2,18 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { display, body, farsi } from "@/lib/fonts";
 import "./globals.css";
 
-// متادیتای پایه؛ متادیتای دقیق و وابسته به زبان در app/[locale]/layout.tsx است.
 export const metadata: Metadata = {
   metadataBase: new URL("https://farboo.ai"),
   title: "FarBoo",
   robots: { index: true, follow: true },
-  icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-  },
+  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }] },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0C0D0C",
+  themeColor: "#0B0F14",
   width: "device-width",
   initialScale: 1,
 };
@@ -23,12 +20,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // CSP فقط در production فعال می‌شود. در حالت dev، Next.js برای hot-reload به
-  // 'unsafe-eval' نیاز دارد؛ اگر CSP آن را ببندد، جاوااسکریپت اجرا نمی‌شود و
-  // صفحه سفید می‌ماند. هدرهای امنیتی واقعی (شامل frame-ancestors و HSTS) از
-  // طریق public/_headers و vercel.json روی هاست اعمال می‌شوند.
   const isProd = process.env.NODE_ENV === "production";
-
   return (
     <html
       lang="fa"
@@ -44,10 +36,9 @@ export default function RootLayout({
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
+              "img-src 'self' data:",
               "font-src 'self' data:",
               "connect-src 'self'",
-              "worker-src 'self' blob:",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",

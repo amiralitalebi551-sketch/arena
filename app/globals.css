@@ -4,35 +4,6 @@
 
 :root {
   color-scheme: dark;
-
-  /* ── Design Tokens (منبع واحد) ──────────────────────────────
-     همه‌ی کامپوننت‌ها از این توکن‌ها می‌خوانند تا سیستم منسجم بماند
-     و مقدار hardcode پراکنده نداشته باشیم. */
-
-  /* رنگ (هماهنگ با tailwind.config) */
-  --c-base: #0c0d0c;
-  --c-primary: #1f9d6b;
-  --c-primary-400: #3fcf8e;
-  --c-accent: #3fcf8e;
-  --c-warm: #c9a96a;
-  --c-ink: #ede6d6;
-  --c-ink-soft: #a7a99c;
-
-  /* سایه‌ها — ملایم و لایه‌ای برای عمق ادراکی (نه سایه‌ی پیش‌فرض تخت) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 40px -8px rgba(31, 157, 107, 0.45);
-
-  /* شعاع گوشه */
-  --radius-card: 1rem;
-  --radius-pill: 9999px;
-
-  /* مدت‌زمان‌های حرکت — استاندارد واحد برای micro-interactionها.
-     ۱۲۰ms کف ادراک «پاسخ آنی» انسان است. */
-  --dur-fast: 120ms;
-  --dur-base: 240ms;
-  --dur-slow: 400ms;
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -41,6 +12,33 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: #0b0f14;
+}
+
+body {
+  background-color: #0b0f14;
+  color: #f2f5f7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* فونت بر اساس زبان: فارسی = Vazirmatn، انگلیسی = Plus Jakarta Sans */
+[dir="rtl"] body {
+  font-family: var(--font-farsi), Tahoma, system-ui, sans-serif;
+}
+[dir="ltr"] body {
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+::selection {
+  background: rgba(52, 211, 153, 0.3);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid #34d399;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -56,190 +54,61 @@ html {
   }
 }
 
-html {
-  /* رنگ پایه‌ی تیره‌ی قطعی روی html — همیشه پشت همه‌چیز، هرگز سفید نمی‌شود */
-  background-color: #0c0d0c;
-}
-
-body {
-  @apply text-ink antialiased;
-  /* شفاف تا aurora (که با -z-10 پشت body است) دیده شود.
-     چون html تیره است، اگر aurora هم نباشد پس‌زمینه تیره می‌ماند. */
-  background-color: transparent;
-  overflow-x: hidden;
-}
-
-/* فونت بدنه بر اساس جهت/زبان: فارسی = Vazirmatn، انگلیسی = Plus Jakarta Sans */
-[dir="rtl"] body,
-[dir="rtl"] {
-  font-family: var(--font-farsi), Tahoma, system-ui, sans-serif;
-}
-[dir="ltr"] body,
-[dir="ltr"] {
-  font-family: var(--font-body), system-ui, sans-serif;
-}
-
-/* روی دسکتاپ کرسر پیش‌فرض را کم‌رنگ می‌کنیم تا دنباله‌ی نورانی بدرخشد */
-@media (hover: hover) and (pointer: fine) {
-  body {
-    cursor: default;
-  }
-}
-
-::selection {
-  background: rgba(31, 157, 107, 0.35);
-  color: #fff;
-}
-
-/* Focus visibility for keyboard users */
-:focus-visible {
-  outline: 2px solid #3fcf8e;
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 @layer components {
   .container-content {
     @apply mx-auto w-full max-w-content px-5 sm:px-8;
   }
-  /* برای فارسی از uppercase/tracking استفاده نمی‌کنیم */
+  .section {
+    @apply py-20 sm:py-28;
+  }
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium text-accent;
+    @apply inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary;
   }
   .heading-xl {
-    @apply font-bold text-4xl leading-[1.25] sm:text-5xl md:text-6xl;
+    @apply text-4xl font-bold leading-[1.2] sm:text-5xl md:text-6xl;
   }
   .heading-lg {
-    @apply font-bold text-3xl leading-[1.35] sm:text-4xl;
+    @apply text-3xl font-bold leading-[1.25] sm:text-4xl;
+  }
+  .font-display {
+    font-weight: 700;
+  }
+  [dir="ltr"] .heading-xl,
+  [dir="ltr"] .heading-lg,
+  [dir="ltr"] .font-display {
+    font-family: var(--font-display), Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+  [dir="rtl"] .heading-xl,
+  [dir="rtl"] .heading-lg,
+  [dir="rtl"] .font-display {
+    font-family: var(--font-farsi), Tahoma, sans-serif;
   }
   .text-gradient {
-    @apply bg-gradient-to-l from-primary-400 via-accent-400 to-warm bg-clip-text text-transparent;
-  }
-  /* گرادیان متحرک برای تیترهای برجسته */
-  .text-gradient-animated {
-    background: linear-gradient(
-      110deg,
-      #3fcf8e,
-      #5ce0a5,
-      #c9a96a,
-      #3fcf8e
-    );
-    background-size: 220% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: gradient-shift 6s ease infinite;
+    @apply bg-gradient-to-l from-primary-400 to-primary bg-clip-text text-transparent;
   }
   .card {
-    @apply rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6 transition-all duration-300;
+    @apply rounded-2xl border border-white/[0.08] bg-base-800 p-6 transition-all duration-300;
   }
   .card:hover {
-    @apply -translate-y-1 border-white/15;
+    @apply -translate-y-1 border-primary/30 bg-base-700;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-base-900;
+  }
+  .btn-primary {
+    @apply bg-primary text-base-900 hover:bg-primary-400 hover:shadow-[0_0_30px_-6px_rgba(52,211,153,0.5)] focus-visible:ring-primary;
+  }
+  .btn-secondary {
+    @apply border border-white/15 bg-white/[0.03] text-ink hover:border-white/30 hover:bg-white/[0.07] focus-visible:ring-primary;
   }
 }
 
-/* فونت تیترها بر اساس زبان:
-   - فارسی: Vazirmatn (خوانا و زیبا در RTL)
-   - انگلیسی: Fraunces (سِریف مدرن، حس editorial) */
-[dir="rtl"] .heading-xl,
-[dir="rtl"] .heading-lg,
-[dir="rtl"] .font-display {
-  font-family: var(--font-farsi), Tahoma, sans-serif;
-}
-[dir="ltr"] .heading-xl,
-[dir="ltr"] .heading-lg,
-[dir="ltr"] .font-display {
-  font-family: var(--font-display), Georgia, serif;
-}
-/* در انگلیسی تیتر سِریف با tracking کمی بسته‌تر شیک‌تر می‌نشیند */
-[dir="ltr"] .heading-xl,
-[dir="ltr"] .heading-lg {
-  letter-spacing: -0.02em;
-}
-
-@keyframes marquee-rtl {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(50%);
-  }
-}
-
-.marquee-track {
-  animation: marquee-rtl linear infinite;
-}
-.group:hover .marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% center;
-  }
-  50% {
-    background-position: 100% center;
-  }
-  100% {
-    background-position: 0% center;
-  }
-}
-
-@keyframes float-slow {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-18px);
-  }
-}
-
-@keyframes aurora {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: translate(4%, -3%) scale(1.15);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.5;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .animate-float-slow {
-    animation: float-slow 7s ease-in-out infinite;
-  }
-  .animate-aurora {
-    animation: aurora 14s ease-in-out infinite;
-  }
-}
-
+/* شبکه‌ی ملایم پس‌زمینه (اختیاری، تیره) */
 .grid-bg {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
-}
-
-/* نوار پیشرفت اسکرول بالای صفحه */
-.scroll-progress {
-  transform-origin: right; /* RTL */
-}
-
-/* Velocity-aware momentum: عناصر هنگام اسکرول سریع کمی در جهت حرکت کشیده
-   می‌شوند (حس فیزیکی/زنده). --scroll-vel از useScrollVelocity می‌آید.
-   فقط transform استفاده می‌شود (GPU) و در reduced-motion خنثی است. */
-@media (prefers-reduced-motion: no-preference) {
-  .vel-momentum {
-    transform: translateY(calc(var(--scroll-vel, 0) * -8px))
-      scaleY(calc(1 + (var(--scroll-vel, 0) * var(--scroll-vel, 0)) * 0.015));
-    transform-origin: center;
-    will-change: transform;
-  }
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 100%);
 }
