@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { faqs } from "@/data/content";
 import { Reveal } from "@/components/ui/Reveal";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export function FAQ() {
+  const { t } = useI18n();
   const [open, setOpen] = useState<number | null>(0);
   const reduced = useReducedMotion();
 
@@ -13,12 +14,12 @@ export function FAQ() {
     <section id="faq" className="relative py-24 sm:py-32">
       <div className="container-content max-w-3xl">
         <Reveal className="mb-14 text-center">
-          <p className="eyebrow mb-5">سوالات پرتکرار</p>
-          <h2 className="heading-lg">پاسخ‌ها، پیش از اینکه بپرسی.</h2>
+          <p className="eyebrow mb-5">{t.faqHead.eyebrow}</p>
+          <h2 className="heading-lg">{t.faqHead.title}</h2>
         </Reveal>
 
         <dl className="divide-y divide-white/[0.07] border-y border-white/[0.07]">
-          {faqs.map((f, i) => {
+          {t.faqs.map((f, i) => {
             const isOpen = open === i;
             return (
               <div key={f.q}>
@@ -29,16 +30,11 @@ export function FAQ() {
                     aria-expanded={isOpen}
                     aria-controls={`faq-panel-${i}`}
                     id={`faq-button-${i}`}
-                    className="flex w-full items-center justify-between gap-6 py-6 text-left"
+                    className="flex w-full items-center justify-between gap-6 py-6 text-start"
                   >
-                    <span className="font-display text-lg font-medium">
-                      {f.q}
-                    </span>
+                    <span className="font-display text-lg font-medium">{f.q}</span>
                     <span
-                      className={
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-xl transition-transform duration-300 " +
-                        (isOpen ? "rotate-45 bg-primary text-white" : "text-ink-soft")
-                      }
+                      className={"flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-xl transition-transform duration-300 " + (isOpen ? "rotate-45 bg-primary text-white" : "text-ink-soft")}
                       aria-hidden="true"
                     >
                       +
@@ -57,7 +53,7 @@ export function FAQ() {
                       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="pb-6 pr-14 text-ink-soft">{f.a}</p>
+                      <p className="pb-6 text-ink-soft" style={{ paddingInlineEnd: "3.5rem" }}>{f.a}</p>
                     </motion.dd>
                   )}
                 </AnimatePresence>

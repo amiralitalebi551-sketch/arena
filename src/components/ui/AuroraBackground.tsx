@@ -41,15 +41,16 @@ void main(){
   float blend = smoothstep(0.2, 0.9, n * 0.6 + n2 * 0.5);
 
   // پالت برند: بنفش → فیروزه‌ای → گرم
-  vec3 deep   = vec3(0.039, 0.043, 0.078);
-  vec3 violet = vec3(0.427, 0.369, 0.964);
-  vec3 cyan   = vec3(0.133, 0.827, 0.933);
-  vec3 warm   = vec3(0.961, 0.663, 0.498);
+  // پالت «زغالی + زمردی + استخوانی»
+  vec3 deep     = vec3(0.047, 0.051, 0.047); // #0C0D0C زغالی
+  vec3 emerald  = vec3(0.122, 0.616, 0.420); // #1F9D6B زمردی
+  vec3 emerald2 = vec3(0.247, 0.812, 0.557); // #3FCF8E زمردی روشن
+  vec3 bone     = vec3(0.788, 0.663, 0.416); // #C9A96A طلایی گرم
 
   vec3 col = deep;
-  col = mix(col, violet, smoothstep(0.25, 0.75, n) * 0.55);
-  col = mix(col, cyan,   smoothstep(0.45, 0.95, n2) * 0.35);
-  col = mix(col, warm,   pow(blend, 3.0) * 0.15);
+  col = mix(col, emerald,  smoothstep(0.25, 0.75, n) * 0.5);
+  col = mix(col, emerald2, smoothstep(0.45, 0.95, n2) * 0.28);
+  col = mix(col, bone,     pow(blend, 3.0) * 0.1);
 
   // vignette برای تمرکز و خوانایی محتوا
   float vig = smoothstep(1.15, 0.35, length(uv - 0.5));

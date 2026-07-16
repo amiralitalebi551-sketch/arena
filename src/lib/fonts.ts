@@ -1,33 +1,35 @@
 import localFont from "next/font/local";
 
-// Self-hosted fonts (WOFF2 subset). Files live in /public/fonts and are
-// licensed under the SIL Open Font License 1.1 — see README asset list.
+// فونت‌های self-hosted (WOFF2 subset). فایل‌ها در /public/fonts هستند و همه
+// تحت مجوز SIL Open Font License 1.1 — به لیست asset در README مراجعه کنید.
 
-// Space Grotesk — used for Latin display accents.
+// Fraunces — سِریف مدرن و باشخصیت برای تیترهای انگلیسی (حس editorial/آژانس خلاق).
 export const display = localFont({
   src: [
-    { path: "../../public/fonts/space-grotesk-latin-500-normal.woff2", weight: "500", style: "normal" },
-    { path: "../../public/fonts/space-grotesk-latin-600-normal.woff2", weight: "600", style: "normal" },
-    { path: "../../public/fonts/space-grotesk-latin-700-normal.woff2", weight: "700", style: "normal" },
+    { path: "../../public/fonts/fraunces-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/fraunces-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/fraunces-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/fraunces-latin-700-normal.woff2", weight: "700", style: "normal" },
   ],
   variable: "--font-display",
   display: "swap",
-  fallback: ["system-ui", "sans-serif"],
+  fallback: ["Georgia", "serif"],
 });
 
-// Inter — Latin body fallback.
+// Plus Jakarta Sans — sans تمیز و امروزی برای متن انگلیسی (ضدکلیشه‌ی Inter).
 export const body = localFont({
   src: [
-    { path: "../../public/fonts/inter-latin-400-normal.woff2", weight: "400", style: "normal" },
-    { path: "../../public/fonts/inter-latin-500-normal.woff2", weight: "500", style: "normal" },
-    { path: "../../public/fonts/inter-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/plus-jakarta-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/plus-jakarta-sans-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/plus-jakarta-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/plus-jakarta-sans-latin-700-normal.woff2", weight: "700", style: "normal" },
   ],
   variable: "--font-body",
   display: "swap",
   fallback: ["system-ui", "sans-serif"],
 });
 
-// Vazirmatn — primary Persian/Farsi typeface for the whole (RTL) UI.
+// Vazirmatn — فونت اصلی فارسی برای کل رابط کاربری (RTL).
 export const farsi = localFont({
   src: [
     { path: "../../public/fonts/vazirmatn-arabic-400-normal.woff2", weight: "400", style: "normal" },

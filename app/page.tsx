@@ -1,50 +1,23 @@
-import { Navigation } from "@/components/sections/Navigation";
-import { Hero } from "@/components/sections/Hero";
-import { TrustBar } from "@/components/sections/TrustBar";
-import { ProblemSolution } from "@/components/sections/ProblemSolution";
-import { Features } from "@/components/sections/Features";
-import { ScrollStory } from "@/components/sections/ScrollStory";
-import { HowItWorks } from "@/components/sections/HowItWorks";
-import { SocialProof } from "@/components/sections/SocialProof";
-import { Pricing } from "@/components/sections/Pricing";
-import { FAQ } from "@/components/sections/FAQ";
-import { FinalCTA } from "@/components/sections/FinalCTA";
-import { Footer } from "@/components/sections/Footer";
-import { ScrollProgress } from "@/components/ui/ScrollProgress";
-import { SectionTransition } from "@/components/ui/SectionTransition";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { defaultLocale } from "@/i18n";
 
-export default function Home() {
+// در static export این صفحه /index.html می‌شود و با meta refresh به زبان
+// پیش‌فرض هدایت می‌کند (بدون وابستگی به جاوااسکریپت). لینک هم fallback است.
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+  alternates: { canonical: `/${defaultLocale}` },
+};
+
+export default function RootRedirect() {
   return (
     <>
-      <ScrollProgress />
-      <Navigation />
-      <main id="main">
-        <Hero />
-        <TrustBar />
-        <SectionTransition>
-          <ProblemSolution />
-        </SectionTransition>
-        <SectionTransition>
-          <Features />
-        </SectionTransition>
-        <ScrollStory />
-        <SectionTransition>
-          <HowItWorks />
-        </SectionTransition>
-        <SectionTransition>
-          <SocialProof />
-        </SectionTransition>
-        <SectionTransition>
-          <Pricing />
-        </SectionTransition>
-        <SectionTransition>
-          <FAQ />
-        </SectionTransition>
-        <SectionTransition>
-          <FinalCTA />
-        </SectionTransition>
-      </main>
-      <Footer />
+      <meta httpEquiv="refresh" content={`0; url=/${defaultLocale}`} />
+      <div className="flex min-h-screen items-center justify-center bg-base-900 text-ink">
+        <Link href={`/${defaultLocale}`} className="text-accent hover:underline">
+          FarBoo →
+        </Link>
+      </div>
     </>
   );
 }

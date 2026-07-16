@@ -1,13 +1,13 @@
 import type { MetadataRoute } from "next";
-import { site } from "@/data/site";
+import { locales } from "@/i18n";
+
+const BASE = "https://farboo.ai";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: site.domain,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1,
-    },
-  ];
+  return locales.map((locale) => ({
+    url: `${BASE}/${locale}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: locale === "fa" ? 1 : 0.9,
+  }));
 }

@@ -23,9 +23,9 @@ export function NeuralCore({ detail, pointer, scroll, reduced }: Props) {
       uMorph: { value: 0 },
       uPointer: { value: new THREE.Vector3() },
       uPointerStrength: { value: 0 },
-      uColorA: { value: new THREE.Color("#6D5EF6") },
-      uColorB: { value: new THREE.Color("#22D3EE") },
-      uRimColor: { value: new THREE.Color("#8B7FF9") },
+      uColorA: { value: new THREE.Color("#1F9D6B") },
+      uColorB: { value: new THREE.Color("#3FCF8E") },
+      uRimColor: { value: new THREE.Color("#5CE0A5") },
       uFresnelPower: { value: 2.6 },
     }),
     []

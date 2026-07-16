@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/useReducedMotion";
-import { site } from "@/data/site";
+import { useI18n } from "@/i18n/I18nProvider";
 
 /**
  * پری‌لودر سینمایی: یک صفحه‌ی ورودی کوتاه با لوگوی برند و نوار پیشرفت.
@@ -10,6 +10,7 @@ import { site } from "@/data/site";
  * روی محتوای اصلی تأثیر LCP ندارد چون overlay است و سریع کنار می‌رود.
  */
 export function Preloader() {
+  const { t } = useI18n();
   const reduced = useReducedMotion();
   const [done, setDone] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -106,9 +107,9 @@ export function Preloader() {
 
             <div className="text-center">
               <div className="font-display text-2xl font-bold text-ink">
-                {site.name}
+                {t.brand.name}
               </div>
-              <div className="mt-1 text-xs text-ink-soft">{site.tagline}</div>
+              <div className="mt-1 text-xs text-ink-soft">{t.brand.tagline}</div>
             </div>
 
             {/* نوار پیشرفت */}

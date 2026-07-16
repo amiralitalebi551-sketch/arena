@@ -75,11 +75,11 @@ export default function Scene() {
       >
         <PerformanceMonitor />
         <AdaptiveDpr pixelated />
-        <color attach="background" args={["#0A0B14"]} />
-        <fog attach="fog" args={["#0A0B14", 6, 14]} />
+        <color attach="background" args={["#0C0D0C"]} />
+        <fog attach="fog" args={["#0C0D0C", 6, 14]} />
         <ambientLight intensity={0.4} />
-        <pointLight position={[4, 5, 4]} intensity={40} color="#6D5EF6" />
-        <pointLight position={[-5, -3, 2]} intensity={25} color="#22D3EE" />
+        <pointLight position={[4, 5, 4]} intensity={40} color="#1F9D6B" />
+        <pointLight position={[-5, -3, 2]} intensity={25} color="#3FCF8E" />
 
         <PointerTracker pointer={pointer} reduced={reduced} />
         <NeuralCore

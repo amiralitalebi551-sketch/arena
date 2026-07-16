@@ -3,27 +3,11 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
 import { useReducedMotion } from "@/lib/useReducedMotion";
-
-const beats = [
-  {
-    title: "حافظه‌ی برندت را بارگذاری کن",
-    body: "گایدلاین، نمونه‌کارها و لحن به یک منبع حقیقت مشترک تبدیل می‌شوند که هر ایجنت از آن می‌خواند.",
-  },
-  {
-    title: "رهبر ارکستر برنامه می‌ریزد",
-    body: "یک بریف به وظایف شکسته و به متخصص درست سپرده می‌شود — مثل یک مدیر خلاق که کار را در اتاق تقسیم می‌کند.",
-  },
-  {
-    title: "ایجنت‌ها همدیگر را اصلاح می‌کنند",
-    body: "پیش‌نویس، نقد، بازنگری. کیفیت انباشته می‌شود، چون متخصص‌ها کار را به چالش می‌کشند و تیزتر می‌کنند.",
-  },
-  {
-    title: "منطبق با برند تحویل بده",
-    body: "استراتژی، کپی و سیستم‌های بصری آماده‌ی انتشار — یکدست از اولین پیکسل تا آخرین.",
-  },
-];
+import { useI18n } from "@/i18n/I18nProvider";
 
 export function ScrollStory() {
+  const { t } = useI18n();
+  const beats = t.story.beats;
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -45,7 +29,7 @@ export function ScrollStory() {
       ref={ref}
       className="relative"
       style={{ height: reduced ? "auto" : "320vh" }}
-      aria-label="نحوه کار فربو"
+      aria-label={t.story.ariaLabel}
     >
       <div
         className={
@@ -77,9 +61,9 @@ export function ScrollStory() {
               style={reduced ? undefined : { rotate, scale, filter }}
               className="relative h-64 w-64 sm:h-80 sm:w-80"
             >
-              <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#6D5EF6,#22D3EE,#F5A97F,#6D5EF6)] opacity-80 blur-[1px]" />
+              <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#1F9D6B,#3FCF8E,#C9A96A,#1F9D6B)] opacity-80 blur-[1px]" />
               <div className="absolute inset-6 rounded-full bg-base-900" />
-              <div className="absolute inset-10 rounded-full bg-[radial-gradient(circle_at_35%_30%,#8B7FF9,#5A4CE0_60%,#22D3EE)]" />
+              <div className="absolute inset-10 rounded-full bg-[radial-gradient(circle_at_35%_30%,#5CE0A5,#178055_60%,#3FCF8E)]" />
               <div className="absolute inset-0 rounded-full border border-white/10" />
             </motion.div>
           </div>
@@ -87,10 +71,8 @@ export function ScrollStory() {
           {/* Text beats */}
           <div className="order-1 space-y-8 lg:order-2">
             <Reveal>
-              <p className="eyebrow mb-4">نحوه کار</p>
-              <h2 className="heading-lg">
-                یک بریف بده. خروجی یک استودیوی کامل بگیر.
-              </h2>
+              <p className="eyebrow mb-4">{t.story.eyebrow}</p>
+              <h2 className="heading-lg">{t.story.title}</h2>
             </Reveal>
             <ol className="space-y-6">
               {beats.map((b, i) => (
@@ -98,6 +80,7 @@ export function ScrollStory() {
                   key={b.title}
                   beat={b}
                   index={i}
+                  total={beats.length}
                   progress={scrollYProgress}
                   reduced={reduced}
                 />
@@ -113,15 +96,16 @@ export function ScrollStory() {
 function StoryBeat({
   beat,
   index,
+  total,
   progress,
   reduced,
 }: {
   beat: { title: string; body: string };
   index: number;
+  total: number;
   progress: ReturnType<typeof useScroll>["scrollYProgress"];
   reduced: boolean;
 }) {
-  const total = beats.length;
   const start = index / total;
   const end = (index + 1) / total;
   const opacity = useTransform(

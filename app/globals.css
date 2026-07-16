@@ -29,16 +29,24 @@ html {
 
 html {
   /* رنگ پایه روی html تا در نبود WebGL پس‌زمینه‌ی تیره‌ی مطمئن داشته باشیم */
-  background-color: #0a0b14;
+  background-color: #0c0d0c;
 }
 
 body {
-  /* فونت فارسی (Vazirmatn) به‌عنوان فونت اصلی کل رابط کاربری */
   @apply text-ink antialiased;
   /* شفاف تا پس‌زمینه‌ی زنده‌ی aurora از پشت دیده شود */
   background-color: transparent;
-  font-family: var(--font-farsi), var(--font-body), system-ui, sans-serif;
   overflow-x: hidden;
+}
+
+/* فونت بدنه بر اساس جهت/زبان: فارسی = Vazirmatn، انگلیسی = Plus Jakarta Sans */
+[dir="rtl"] body,
+[dir="rtl"] {
+  font-family: var(--font-farsi), Tahoma, system-ui, sans-serif;
+}
+[dir="ltr"] body,
+[dir="ltr"] {
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
 /* روی دسکتاپ کرسر پیش‌فرض را کم‌رنگ می‌کنیم تا دنباله‌ی نورانی بدرخشد */
@@ -49,13 +57,13 @@ body {
 }
 
 ::selection {
-  background: rgba(109, 94, 246, 0.35);
+  background: rgba(31, 157, 107, 0.35);
   color: #fff;
 }
 
 /* Focus visibility for keyboard users */
 :focus-visible {
-  outline: 2px solid #22d3ee;
+  outline: 2px solid #3fcf8e;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -69,16 +77,10 @@ body {
     @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-medium text-accent;
   }
   .heading-xl {
-    /* برای فارسی از فونت فارسی و line-height مناسب استفاده می‌کنیم */
-    font-family: var(--font-farsi), var(--font-display), sans-serif;
-    @apply text-4xl font-bold leading-[1.25] sm:text-5xl md:text-6xl;
+    @apply font-bold text-4xl leading-[1.25] sm:text-5xl md:text-6xl;
   }
   .heading-lg {
-    font-family: var(--font-farsi), var(--font-display), sans-serif;
-    @apply text-3xl font-bold leading-[1.35] sm:text-4xl;
-  }
-  .font-display {
-    font-family: var(--font-farsi), var(--font-display), sans-serif;
+    @apply font-bold text-3xl leading-[1.35] sm:text-4xl;
   }
   .text-gradient {
     @apply bg-gradient-to-l from-primary-400 via-accent-400 to-warm bg-clip-text text-transparent;
@@ -87,10 +89,10 @@ body {
   .text-gradient-animated {
     background: linear-gradient(
       110deg,
-      #8b7ff9,
-      #4fddf2,
-      #f5a97f,
-      #8b7ff9
+      #3fcf8e,
+      #5ce0a5,
+      #c9a96a,
+      #3fcf8e
     );
     background-size: 220% auto;
     -webkit-background-clip: text;
@@ -104,6 +106,25 @@ body {
   .card:hover {
     @apply -translate-y-1 border-white/15;
   }
+}
+
+/* فونت تیترها بر اساس زبان:
+   - فارسی: Vazirmatn (خوانا و زیبا در RTL)
+   - انگلیسی: Fraunces (سِریف مدرن، حس editorial) */
+[dir="rtl"] .heading-xl,
+[dir="rtl"] .heading-lg,
+[dir="rtl"] .font-display {
+  font-family: var(--font-farsi), Tahoma, sans-serif;
+}
+[dir="ltr"] .heading-xl,
+[dir="ltr"] .heading-lg,
+[dir="ltr"] .font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+/* در انگلیسی تیتر سِریف با tracking کمی بسته‌تر شیک‌تر می‌نشیند */
+[dir="ltr"] .heading-xl,
+[dir="ltr"] .heading-lg {
+  letter-spacing: -0.02em;
 }
 
 @keyframes marquee-rtl {

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useHoverSound, toggleSound, isSoundOn } from "@/lib/useHoverSound";
+import { useI18n } from "@/i18n/I18nProvider";
 
 /**
  * لایه‌ی تعامل سراسری (با event delegation روی document):
@@ -10,6 +11,7 @@ import { useHoverSound, toggleSound, isSoundOn } from "@/lib/useHoverSound";
  *   کار می‌کند و هیچ listenerی روی تک‌تک عناصر باقی نمی‌ماند (بدون نشتی).
  */
 export function InteractionLayer() {
+  const { t } = useI18n();
   const play = useHoverSound();
   const [soundOn, setSoundOn] = useState(false);
   // عنصر مگنتیک فعال فعلی، برای بازگرداندن transform هنگام خروج
@@ -93,7 +95,7 @@ export function InteractionLayer() {
       type="button"
       onClick={() => setSoundOn(toggleSound())}
       aria-pressed={soundOn}
-      aria-label={soundOn ? "خاموش کردن افکت صوتی" : "روشن کردن افکت صوتی"}
+      aria-label={soundOn ? t.ui.soundOff : t.ui.soundOn}
       className="fixed bottom-5 left-5 z-[80] flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-base-800/70 text-ink-soft backdrop-blur-md transition-colors hover:border-primary/40 hover:text-ink"
     >
       {soundOn ? (

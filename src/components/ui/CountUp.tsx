@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import type { Locale } from "@/i18n";
 
-/** تبدیل عدد لاتین به رقم فارسی. */
+/** تبدیل ارقام لاتین به فارسی. */
 function toFa(input: string): string {
   const map = "۰۱۲۳۴۵۶۷۸۹";
   return input.replace(/\d/g, (d) => map[Number(d)]);
@@ -13,10 +14,17 @@ interface Props {
   decimals?: number;
   duration?: number;
   className?: string;
+  locale?: Locale;
 }
 
-/** شمارنده‌ای که وقتی وارد دید می‌شود، از صفر تا مقدار هدف با easing می‌شمارد. */
-export function CountUp({ value, decimals = 0, duration = 1600, className }: Props) {
+/** شمارنده‌ای که هنگام ورود به دید، از صفر تا مقدار هدف با easing می‌شمارد. */
+export function CountUp({
+  value,
+  decimals = 0,
+  duration = 1600,
+  className,
+  locale = "fa",
+}: Props) {
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState(0);
   const started = useRef(false);
@@ -36,7 +44,6 @@ export function CountUp({ value, decimals = 0, duration = 1600, className }: Pro
           const start = performance.now();
           const tick = (now: number) => {
             const t = Math.min(1, (now - start) / duration);
-            // easeOutCubic
             const eased = 1 - Math.pow(1 - t, 3);
             setDisplay(value * eased);
             if (t < 1) requestAnimationFrame(tick);
@@ -51,7 +58,8 @@ export function CountUp({ value, decimals = 0, duration = 1600, className }: Pro
     return () => io.disconnect();
   }, [value, duration, reduced]);
 
-  const text = toFa(display.toFixed(decimals));
+  const raw = display.toFixed(decimals);
+  const text = locale === "fa" ? toFa(raw) : raw;
   return (
     <span ref={ref} className={className}>
       {text}

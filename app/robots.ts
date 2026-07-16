@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
-import { site } from "@/data/site";
+
+const BASE = "https://farboo.ai";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/" },
-    sitemap: `${site.domain}/sitemap.xml`,
+    sitemap: `${BASE}/sitemap.xml`,
   };
 }

@@ -13,6 +13,7 @@ interface Props {
   loading?: boolean;
   ariaLabel?: string;
   type?: "button" | "submit";
+  dir?: "rtl" | "ltr";
 }
 
 export function MagneticButton({
@@ -24,6 +25,7 @@ export function MagneticButton({
   loading = false,
   ariaLabel,
   type = "button",
+  dir = "rtl",
 }: Props) {
   const ref = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -59,9 +61,13 @@ export function MagneticButton({
       {variant === "primary" && !loading && (
         <span
           aria-hidden="true"
-          className="transition-transform duration-300 group-hover:-translate-x-1"
+          className={
+            dir === "rtl"
+              ? "transition-transform duration-300 group-hover:-translate-x-1"
+              : "transition-transform duration-300 group-hover:translate-x-1"
+          }
         >
-          ←
+          {dir === "rtl" ? "←" : "→"}
         </span>
       )}
     </>

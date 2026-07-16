@@ -38,8 +38,8 @@ export function ParticleField({ count, pointer, scroll, reduced }: Props) {
       uScale: { value: 1 },
       uPointer: { value: new THREE.Vector3() },
       uPointerStrength: { value: 0 },
-      uColorA: { value: new THREE.Color("#22D3EE") },
-      uColorB: { value: new THREE.Color("#8B7FF9") },
+      uColorA: { value: new THREE.Color("#3FCF8E") },
+      uColorB: { value: new THREE.Color("#5CE0A5") },
     }),
     []
   );
