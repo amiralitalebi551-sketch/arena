@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://farboo.ai"),
   title: "FarBoo",
   robots: { index: true, follow: true },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export const viewport: Viewport = {
