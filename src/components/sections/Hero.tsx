@@ -86,7 +86,7 @@ export function Hero() {
           </motion.p>
 
           <motion.div {...fade(0.85)} className="flex flex-wrap items-center gap-4">
-            <Button href={t.cta.primary.href} variant="primary">
+            <Button href={t.cta.primary.href} variant="primary" magnetic>
               {t.cta.primary.label}
             </Button>
             <Button href={t.cta.secondary.href} variant="secondary">

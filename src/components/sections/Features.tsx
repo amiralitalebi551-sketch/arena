@@ -3,6 +3,48 @@ import { Reveal } from "@/components/ui/Reveal";
 import { Icon } from "@/components/ui/Icon";
 import { useI18n } from "@/i18n/I18nProvider";
 
+function FeatureCard({
+  f,
+  delay,
+}: {
+  f: { title: string; desc: string; icon: string };
+  delay: number;
+}) {
+  // نور دنبال‌کننده‌ی موس (spotlight) با متغیر CSS — بدون re-render
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
+  return (
+    <Reveal delay={delay}>
+      <div
+        onMouseMove={onMove}
+        className="card group relative h-full overflow-hidden"
+      >
+        {/* نور دنبال‌کننده */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            background:
+              "radial-gradient(220px circle at var(--mx) var(--my), rgba(52,211,153,0.14), transparent 65%)",
+          }}
+        />
+        <div className="relative">
+          <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-primary transition-colors group-hover:border-primary/40 group-hover:bg-primary/10">
+            <Icon name={f.icon} />
+          </div>
+          <h3 className="mb-2 font-display text-lg font-semibold">{f.title}</h3>
+          <p className="text-sm leading-relaxed text-ink-soft">{f.desc}</p>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
 export function Features() {
   const { t } = useI18n();
   return (
@@ -15,15 +57,7 @@ export function Features() {
         </Reveal>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {t.features.map((f, i) => (
-            <Reveal key={f.title} delay={(i % 3) * 0.08}>
-              <div className="card group h-full">
-                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-primary transition-colors group-hover:border-primary/40 group-hover:bg-primary/10">
-                  <Icon name={f.icon} />
-                </div>
-                <h3 className="mb-2 font-display text-lg font-semibold">{f.title}</h3>
-                <p className="text-sm leading-relaxed text-ink-soft">{f.desc}</p>
-              </div>
-            </Reveal>
+            <FeatureCard key={f.title} f={f} delay={(i % 3) * 0.08} />
           ))}
         </div>
       </div>
