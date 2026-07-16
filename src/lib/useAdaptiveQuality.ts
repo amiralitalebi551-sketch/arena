@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   detectInitialTier,
   downgrade,
@@ -13,8 +13,6 @@ import {
  */
 export function useAdaptiveQuality(): QualitySettings {
   const [tier, setTier] = useState(() => detectInitialTier());
-  const settingsRef = useRef<QualitySettings>(getSettings(tier));
-  settingsRef.current = getSettings(tier);
 
   useEffect(() => {
     let raf = 0;

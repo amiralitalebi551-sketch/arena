@@ -16,11 +16,14 @@ export function Preloader() {
   const [mounted, setMounted] = useState(true);
 
   useEffect(() => {
-    // اگر قبلاً در این session دیده شده، رد شو
-    if (
-      typeof window !== "undefined" &&
-      sessionStorage.getItem("farboo_preloaded")
-    ) {
+    // اگر قبلاً در این session دیده شده، رد شو (با گارد در برابر storage مسدود)
+    let seen = false;
+    try {
+      seen = !!sessionStorage.getItem("farboo_preloaded");
+    } catch {
+      seen = false;
+    }
+    if (seen) {
       setMounted(false);
       return;
     }
@@ -28,25 +31,28 @@ export function Preloader() {
     // قفل اسکرول در حین نمایش
     document.body.style.overflow = "hidden";
 
+    let raf = 0;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
     if (reduced) {
-      const t = setTimeout(finish, 400);
-      return () => clearTimeout(t);
+      timeout = setTimeout(finish, 400);
+    } else {
+      const start = performance.now();
+      const duration = 1500;
+      const tick = (now: number) => {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        setProgress(Math.round(eased * 100));
+        if (t < 1) raf = requestAnimationFrame(tick);
+        else finish();
+      };
+      raf = requestAnimationFrame(tick);
     }
 
-    let raf = 0;
-    const start = performance.now();
-    const duration = 1500;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setProgress(Math.round(eased * 100));
-      if (t < 1) raf = requestAnimationFrame(tick);
-      else finish();
-    };
-    raf = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(raf);
-      // اطمینان از بازگشت اسکرول حتی اگر کامپوننت زودتر unmount شود
+      if (timeout) clearTimeout(timeout);
+      // اطمینان از بازگشت اسکرول در هر مسیر (حتی unmount زودهنگام)
       document.body.style.overflow = "";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,8 +60,10 @@ export function Preloader() {
 
   const finish = () => {
     setDone(true);
-    if (typeof window !== "undefined") {
+    try {
       sessionStorage.setItem("farboo_preloaded", "1");
+    } catch {
+      /* storage مسدود: مشکلی نیست، فقط بار بعد دوباره نمایش داده می‌شود */
     }
     document.body.style.overflow = "";
   };

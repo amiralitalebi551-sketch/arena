@@ -1,28 +1,31 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHoverSound, toggleSound, isSoundOn } from "@/lib/useHoverSound";
 
 /**
- * لایه‌ی تعامل سراسری:
- * - افکت صوتی ظریف روی hover/کلیک تمام لینک‌ها و دکمه‌ها (با delegation، بدون
- *   نیاز به تغییر هر کامپوننت) — فقط وقتی کاربر صدا را روشن کرده باشد.
- * - دکمه‌ی شناور روشن/خاموش کردن صدا.
- * افکت مگنتیک عمومی هم در همین‌جا روی عناصر دارای [data-magnetic] اعمال می‌شود.
+ * لایه‌ی تعامل سراسری (با event delegation روی document):
+ * - افکت صوتی ظریف روی hover/کلیک تمام لینک‌ها و دکمه‌ها.
+ * - افکت مگنتیک روی عناصر دارای [data-magnetic] — چون از delegation استفاده
+ *   می‌کند، برای عناصر داینامیک (مثل منوی موبایل) هم بدون نیاز به query دوباره
+ *   کار می‌کند و هیچ listenerی روی تک‌تک عناصر باقی نمی‌ماند (بدون نشتی).
  */
 export function InteractionLayer() {
   const play = useHoverSound();
   const [soundOn, setSoundOn] = useState(false);
+  // عنصر مگنتیک فعال فعلی، برای بازگرداندن transform هنگام خروج
+  const activeMagnet = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     setSoundOn(isSoundOn());
 
-    const isInteractive = (el: EventTarget | null) =>
-      el instanceof HTMLElement &&
-      el.closest("a, button, [role='button']");
+    const interactiveOf = (el: EventTarget | null): HTMLElement | null =>
+      el instanceof HTMLElement
+        ? (el.closest("a, button, [role='button']") as HTMLElement | null)
+        : null;
 
     let lastHover: Element | null = null;
     const onOver = (e: PointerEvent) => {
-      const target = isInteractive(e.target);
+      const target = interactiveOf(e.target);
       if (target && target !== lastHover) {
         lastHover = target;
         play("hover");
@@ -31,45 +34,57 @@ export function InteractionLayer() {
       }
     };
     const onClick = (e: MouseEvent) => {
-      if (isInteractive(e.target)) play("click");
+      if (interactiveOf(e.target)) play("click");
     };
 
-    // افکت مگنتیک سبک روی عناصر نشان‌دار
-    const magnets = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-magnetic]")
-    );
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // آیا افکت‌های حرکتی مجازند؟ (بار اول محاسبه می‌شود؛ کافی است)
+    const motionOff =
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const magnetHandlers: Array<() => void> = [];
-    if (!coarse && !reduced) {
-      magnets.forEach((el) => {
-        const strength = Number(el.dataset.magnetic) || 0.25;
-        const move = (ev: MouseEvent) => {
-          const r = el.getBoundingClientRect();
-          const x = (ev.clientX - (r.left + r.width / 2)) * strength;
-          const y = (ev.clientY - (r.top + r.height / 2)) * strength;
-          el.style.transform = `translate(${x}px, ${y}px)`;
-        };
-        const leave = () => {
-          el.style.transform = "translate(0,0)";
-        };
+    const magnetOf = (el: EventTarget | null): HTMLElement | null =>
+      el instanceof HTMLElement
+        ? (el.closest("[data-magnetic]") as HTMLElement | null)
+        : null;
+
+    const onMove = (e: PointerEvent) => {
+      if (motionOff) return;
+      const el = magnetOf(e.target);
+      if (!el) {
+        if (activeMagnet.current) {
+          activeMagnet.current.style.transform = "translate(0,0)";
+          activeMagnet.current = null;
+        }
+        return;
+      }
+      if (activeMagnet.current && activeMagnet.current !== el) {
+        activeMagnet.current.style.transform = "translate(0,0)";
+      }
+      activeMagnet.current = el;
+      if (!el.style.transition) {
         el.style.transition = "transform 0.3s cubic-bezier(0.22,1,0.36,1)";
-        el.addEventListener("mousemove", move);
-        el.addEventListener("mouseleave", leave);
-        magnetHandlers.push(() => {
-          el.removeEventListener("mousemove", move);
-          el.removeEventListener("mouseleave", leave);
-        });
-      });
+      }
+      const strength = Number(el.dataset.magnetic) || 0.25;
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - (r.left + r.width / 2)) * strength;
+      const y = (e.clientY - (r.top + r.height / 2)) * strength;
+      el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    };
+
+    document.addEventListener("pointerover", onOver, { passive: true });
+    document.addEventListener("click", onClick, { passive: true });
+    if (!motionOff) {
+      document.addEventListener("pointermove", onMove, { passive: true });
     }
 
-    window.addEventListener("pointerover", onOver, { passive: true });
-    window.addEventListener("click", onClick, { passive: true });
     return () => {
-      window.removeEventListener("pointerover", onOver);
-      window.removeEventListener("click", onClick);
-      magnetHandlers.forEach((fn) => fn());
+      document.removeEventListener("pointerover", onOver);
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("pointermove", onMove);
+      if (activeMagnet.current) {
+        activeMagnet.current.style.transform = "translate(0,0)";
+        activeMagnet.current = null;
+      }
     };
   }, [play]);
 

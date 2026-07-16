@@ -76,8 +76,16 @@ export function CursorTrail() {
     let raf = 0;
     let running = true;
     const onVisibility = () => {
-      running = !document.hidden;
-      if (running) loop();
+      const nowHidden = document.hidden;
+      if (nowHidden) {
+        running = false;
+        cancelAnimationFrame(raf);
+      } else if (!running) {
+        // فقط اگر متوقف بوده دوباره شروع کن تا حلقه‌های موازی ایجاد نشود
+        running = true;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(loop);
+      }
     };
     document.addEventListener("visibilitychange", onVisibility);
 

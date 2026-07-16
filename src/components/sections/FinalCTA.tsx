@@ -22,9 +22,16 @@ export function FinalCTA() {
     }
     setError("");
     setStatus("loading");
-    // ارسال شبیه‌سازی‌شده — در نسخه‌ی واقعی به CRM / روت API خودت وصلش کن.
-    await new Promise((r) => setTimeout(r, 1100));
-    setStatus("success");
+    try {
+      // ارسال شبیه‌سازی‌شده — در نسخه‌ی واقعی به CRM / روت API خودت وصلش کن.
+      // ساختار try/catch/finally عمداً اینجاست تا هنگام اتصال fetch واقعی،
+      // خطاها به‌درستی مدیریت شوند و وضعیت روی "loading" گیر نکند.
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+      setStatus("success");
+    } catch {
+      setError("ارسال ناموفق بود. لطفاً دوباره تلاش کنید.");
+      setStatus("error");
+    }
   };
 
   return (

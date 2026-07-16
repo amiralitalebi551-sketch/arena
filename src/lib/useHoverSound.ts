@@ -14,12 +14,10 @@ export function useHoverSound() {
   const enabledRef = useRef(false);
 
   useEffect(() => {
-    // خواندن ترجیح ذخیره‌شده
-    if (typeof window !== "undefined") {
-      enabledRef.current = localStorage.getItem("farboo_sound") === "on";
-    }
+    // خواندن ترجیح ذخیره‌شده (isSoundOn خودش در برابر خطای storage گارد دارد)
+    enabledRef.current = isSoundOn();
     const onChange = () => {
-      enabledRef.current = localStorage.getItem("farboo_sound") === "on";
+      enabledRef.current = isSoundOn();
     };
     window.addEventListener("farboo-sound-change", onChange);
     return () => window.removeEventListener("farboo-sound-change", onChange);
@@ -53,6 +51,15 @@ export function useHoverSound() {
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
 
       osc.connect(gain).connect(ctx.destination);
+      // پاک‌سازی صریح node ها پس از پایان صدا تا از انباشت جلوگیری شود
+      osc.onended = () => {
+        try {
+          osc.disconnect();
+          gain.disconnect();
+        } catch {
+          /* noop */
+        }
+      };
       osc.start(now);
       osc.stop(now + 0.14);
     } catch {
@@ -64,14 +71,23 @@ export function useHoverSound() {
 }
 
 export function toggleSound(): boolean {
-  const current = localStorage.getItem("farboo_sound") === "on";
-  const next = !current;
-  localStorage.setItem("farboo_sound", next ? "on" : "off");
-  window.dispatchEvent(new Event("farboo-sound-change"));
-  return next;
+  try {
+    const current = localStorage.getItem("farboo_sound") === "on";
+    const next = !current;
+    localStorage.setItem("farboo_sound", next ? "on" : "off");
+    window.dispatchEvent(new Event("farboo-sound-change"));
+    return next;
+  } catch {
+    // storage مسدود (مثل حالت private در Safari): همان مقدار قبلی را برگردان
+    return isSoundOn();
+  }
 }
 
 export function isSoundOn(): boolean {
   if (typeof window === "undefined") return false;
-  return localStorage.getItem("farboo_sound") === "on";
+  try {
+    return localStorage.getItem("farboo_sound") === "on";
+  } catch {
+    return false;
+  }
 }
