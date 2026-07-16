@@ -2,7 +2,7 @@
 import { features } from "@/data/content";
 import { Reveal } from "@/components/ui/Reveal";
 import { Icon } from "@/components/ui/Icon";
-import { useRef } from "react";
+import { useTilt } from "@/lib/useTilt";
 
 function FeatureCard({
   feature,
@@ -11,32 +11,46 @@ function FeatureCard({
   feature: (typeof features)[number];
   index: number;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const onMove = (e: React.MouseEvent) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    el.style.setProperty("--mx", `${e.clientX - rect.left}px`);
-    el.style.setProperty("--my", `${e.clientY - rect.top}px`);
-  };
+  const { ref, onMove, onLeave } = useTilt(9);
 
   return (
     <Reveal delay={(index % 3) * 0.08}>
       <div
         ref={ref}
         onMouseMove={onMove}
+        onMouseLeave={onLeave}
+        style={{
+          transform:
+            "perspective(900px) rotateX(var(--rx,0)) rotateY(var(--ry,0))",
+          transition: "transform 0.25s cubic-bezier(0.22,1,0.36,1)",
+          transformStyle: "preserve-3d",
+        }}
         className="group card relative h-full overflow-hidden hover:border-primary/30"
       >
+        {/* نور دنبال‌کننده‌ی موس (spotlight) */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background:
-              "radial-gradient(220px circle at var(--mx) var(--my), rgba(109,94,246,0.14), transparent 65%)",
+              "radial-gradient(240px circle at var(--mx) var(--my), rgba(109,94,246,0.18), transparent 60%)",
           }}
         />
-        <div className="relative">
+        {/* حاشیه‌ی درخشان گرادیانی روی hover */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            padding: "1px",
+            background:
+              "linear-gradient(130deg, rgba(109,94,246,0.6), rgba(34,211,238,0.4), transparent)",
+            WebkitMask:
+              "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+            WebkitMaskComposite: "xor",
+            maskComposite: "exclude",
+          }}
+        />
+        <div className="relative" style={{ transform: "translateZ(40px)" }}>
           <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-accent transition-colors group-hover:border-primary/40 group-hover:text-primary-400">
             <Icon name={feature.icon} />
           </div>

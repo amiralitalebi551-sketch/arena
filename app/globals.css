@@ -27,9 +27,16 @@ html {
   }
 }
 
+html {
+  /* رنگ پایه روی html تا در نبود WebGL پس‌زمینه‌ی تیره‌ی مطمئن داشته باشیم */
+  background-color: #0a0b14;
+}
+
 body {
   /* فونت فارسی (Vazirmatn) به‌عنوان فونت اصلی کل رابط کاربری */
-  @apply bg-base-900 text-ink antialiased;
+  @apply text-ink antialiased;
+  /* شفاف تا پس‌زمینه‌ی زنده‌ی aurora از پشت دیده شود */
+  background-color: transparent;
   font-family: var(--font-farsi), var(--font-body), system-ui, sans-serif;
   overflow-x: hidden;
 }
@@ -97,6 +104,22 @@ body {
   .card:hover {
     @apply -translate-y-1 border-white/15;
   }
+}
+
+@keyframes marquee-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-rtl linear infinite;
+}
+.group:hover .marquee-track {
+  animation-play-state: paused;
 }
 
 @keyframes gradient-shift {

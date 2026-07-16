@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { display, body, farsi } from "@/lib/fonts";
 import { site } from "@/data/site";
 import { CursorTrail } from "@/components/ui/CursorTrail";
+import { AuroraBackground } from "@/components/ui/AuroraBackground";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -85,6 +86,7 @@ export default function RootLayout({
         >
           پرش به محتوا
         </a>
+        <AuroraBackground />
         <CursorTrail />
         {children}
         <script
