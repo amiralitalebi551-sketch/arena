@@ -1,0 +1,129 @@
+name: deploy-worker
+
+# PLAN B, fully automated: pushes worker/worker.js to Cloudflare as a Worker and
+# gives you a permanent https://<name>.<subdomain>.workers.dev hostname.
+#
+# You need ONE secret (free, no card):
+#   Settings -> Secrets and variables -> Actions -> New repository secret
+#     CLOUDFLARE_API_TOKEN  =  a token with "Workers Scripts: Edit" (+ Account Settings: Read)
+#                              https://dash.cloudflare.com/profile/api-tokens
+# Optional:
+#     CLOUDFLARE_ACCOUNT_ID (auto-detected if you skip it)
+#     WORKERS_SUBDOMAIN     (your workers.dev subdomain, auto-detected too)
+#
+# Run sync-worker.yml once first so worker/worker.js exists.
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Worker name -> <name>.<your-subdomain>.workers.dev'
+        default: 'bpb-vless'
+      uuid:
+        description: 'VLESS UUID written into wrangler env (panel still lets you change it)'
+        default: 'bac2db35-df5b-47e1-a8e1-19ecd81c1ed5'
+      kv:
+        description: 'Create/attach a KV namespace for panel settings'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Preflight
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Add the CLOUDFLARE_API_TOKEN repository secret first (see the comment at the top of this workflow)."
+            exit 1
+          fi
+          if [ ! -f worker/worker.js ]; then
+            echo "::error::worker/worker.js is missing. Run the sync-worker workflow once."
+            exit 1
+          fi
+
+      - name: Resolve account + subdomain
+        id: cf
+        run: |
+          ACC="$CLOUDFLARE_ACCOUNT_ID"
+          if [ -z "$ACC" ]; then
+            ACC="$(curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                    https://api.cloudflare.com/client/v4/accounts | jq -r '.result[0].id')"
+          fi
+          [ -n "$ACC" ] && [ "$ACC" != "null" ] || { echo "::error::could not resolve account id"; exit 1; }
+          SUB="$(curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                  "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/subdomain" | jq -r '.result.subdomain // empty')"
+          echo "account=$ACC" >> "$GITHUB_OUTPUT"
+          echo "subdomain=$SUB" >> "$GITHUB_OUTPUT"
+          echo "account=$ACC subdomain=$SUB"
+
+      - name: KV namespace
+        id: kv
+        if: ${{ inputs.kv }}
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.cf.outputs.account }}
+        run: |
+          OUT="$(npx --yes wrangler@latest kv namespace create SETTINGS 2>&1 || true)"
+          echo "$OUT"
+          ID="$(printf '%s' "$OUT" | grep -oE '[0-9a-f]{32}' | head -1)"
+          if [ -z "$ID" ]; then
+            ID="$(printf '%s' "$OUT" | sed -n 's/.*id[\"'"'"':= ]*\([0-9a-f]\{32\}\).*/\1/p' | head -1)"
+          fi
+          echo "kv_id=$ID" >> "$GITHUB_OUTPUT"
+
+      - name: Write wrangler.toml
+        run: |
+          ACC="${{ steps.cf.outputs.account }}"
+          KV="${{ steps.kv.outputs.kv_id }}"
+          cat > worker/wrangler.toml <<EOF
+          name = "${{ inputs.name }}"
+          main = "worker.js"
+          compatibility_date = "2025-01-01"
+          workers_dev = true
+          EOF
+          if [ -n "$KV" ]; then
+            cat >> worker/wrangler.toml <<EOF
+
+          [[kv_namespaces]]
+          binding = "kv"
+          id = "$KV"
+          EOF
+          fi
+          # de-indent (heredoc inside YAML keeps the block indentation)
+          sed -i 's/^          //' worker/wrangler.toml
+          echo "----- wrangler.toml -----"
+          cat worker/wrangler.toml
+
+      - name: Deploy
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.cf.outputs.account }}
+          UUID: ${{ inputs.uuid }}
+        run: npx --yes wrangler@latest deploy --config worker/wrangler.toml 2>&1 | tee /tmp/deploy.log
+
+      - name: Summary
+        if: always()
+        run: |
+          SUB="${{ steps.cf.outputs.subdomain }}"
+          URL="https://${{ inputs.name }}.${SUB}.workers.dev"
+          {
+            echo "### Plan B deployed"
+            echo "- panel: ${URL}/panel  (default password: \`admin\` — CHANGE IT)"
+            echo "- subscription: ${URL}/sub"
+            echo "- In the panel set: UUID \`${{ inputs.uuid }}\`, and turn on **Chain Proxy** pointing at your static-IP upstream if you have one."
+            echo '```'
+            tail -n 25 /tmp/deploy.log 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,78 @@
+name: verify
+
+# Runs the §5 verification protocol for real, on a runner with real internet.
+#
+#  job 1 "local-stack": builds the whole chain on one box
+#      xray-client --TLS--> front.js --> xray-server --> internet
+#    plus the plain-WebSocket shape that ClawCloud/Cloudflare actually give you.
+#    Proves config.json + front.js + the client link format all work together.
+#
+#  job 2 "remote": only if you type a hostname. Dials your REAL deployed server
+#    and runs the same protocol against it, then cross-checks the egress IP that
+#    the container reports against the IP the internet sees.
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: 'Deployed hostname to test (blank = local-stack test only)'
+        default: ''
+      address:
+        description: 'Address the client dials (blank = the hostname; or a clean Cloudflare IP)'
+        default: ''
+      token:
+        description: 'PANEL_TOKEN of the container (for /__ip cross-check)'
+        default: 'cf5d72f32b82'
+      rounds:
+        description: 'Samples per test'
+        default: '10'
+  push:
+    branches: [main]
+    paths: ['server/**', 'scripts/**', '.github/workflows/verify.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  local-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p /tmp/work
+      - name: Full local stack test
+        env:
+          WORK: /tmp/work
+          ROUNDS: '6'
+        run: bash scripts/ci-local-stack.sh
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-stack-logs
+          path: /tmp/work
+          if-no-files-found: ignore
+
+  remote:
+    if: ${{ inputs.host != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test the real endpoint
+        env:
+          HOST: ${{ inputs.host }}
+          ADDR: ${{ inputs.address || inputs.host }}
+          PANEL_TOKEN: ${{ inputs.token }}
+          ROUNDS: ${{ inputs.rounds || '10' }}
+          BIN: /tmp/bin
+        run: bash scripts/test-remote.sh 2>&1 | tee /tmp/remote.txt
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: remote-test
+          path: |
+            /tmp/remote.txt
+            /tmp/bin
+          if-no-files-found: ignore
