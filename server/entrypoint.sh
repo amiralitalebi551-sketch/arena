@@ -1,52 +1,66 @@
 #!/bin/sh
-# Container entrypoint: render the Xray config, supervise Xray, then become the front router.
+# ============================================================================
+#  entrypoint.sh — render the Xray config from env, supervise Xray, then become
+#  the front router (PID 1). Used both by the Docker image and by bootstrap.sh.
+#
+#  env: APP_DIR (default /app) · STATE_DIR (default /data) · XRAY_BIN
+#       UUID · WS_PATH · XRAY_PORT · XRAY_LISTEN · EXTRA_CLIENTS
+# ============================================================================
 set -eu
 
-APP=/app
+APP="${APP_DIR:-/app}"
 DATA="${STATE_DIR:-/data}"
 mkdir -p "$DATA" 2>/dev/null || DATA=/tmp
 CFG="$DATA/xray.json"
 
-XRAY_BIN="$(command -v xray || echo /usr/local/bin/xray)"
+if [ -n "${XRAY_BIN:-}" ] && [ -x "$XRAY_BIN" ]; then
+  X="$XRAY_BIN"
+else
+  X="$(command -v xray || echo /usr/local/bin/xray)"
+fi
 
-echo "[entrypoint] xray: $("$XRAY_BIN" version 2>/dev/null | head -1 || echo unknown)"
-echo "[entrypoint] uuid: ${UUID:-bac2db35-df5b-47e1-a8e1-19ecd81c1ed5}"
-echo "[entrypoint] ws  : ${WS_PATH:-/cf5d72f32b82}   xray port: ${XRAY_PORT:-2087}   public port: ${PORT:-80}"
+echo "[entrypoint] xray : $("$X" version 2>/dev/null | head -1 || echo unknown)  ($X)"
+echo "[entrypoint] uuid : ${UUID:-bac2db35-df5b-47e1-a8e1-19ecd81c1ed5}"
+echo "[entrypoint] ws   : ${WS_PATH:-/cf5d72f32b82}"
+echo "[entrypoint] ports: public=${PORT:-80}  xray=${XRAY_PORT:-2087}  tls=${TLS_PORT:-off}"
 
-# Render config.json, applying env overrides (UUID / WS_PATH / XRAY_PORT / EXTRA_CLIENTS).
-node -e '
+# ---- render config.json, applying env overrides ----------------------------
+APP="$APP" CFG="$CFG" node -e '
 const fs = require("fs");
-const c = JSON.parse(fs.readFileSync("/app/config.json", "utf8"));
+const c = JSON.parse(fs.readFileSync(process.env.APP + "/config.json", "utf8"));
 const inb = c.inbounds.find(i => i.protocol === "vless") || c.inbounds[0];
 inb.listen = process.env.XRAY_LISTEN || "127.0.0.1";
-inb.port = parseInt(process.env.XRAY_PORT || String(inb.port), 10);
+if (process.env.XRAY_PORT) inb.port = parseInt(process.env.XRAY_PORT, 10);
 if (process.env.UUID) inb.settings.clients[0].id = process.env.UUID.trim();
 if (process.env.WS_PATH) {
   let p = process.env.WS_PATH.trim();
   if (!p.startsWith("/")) p = "/" + p;
   inb.streamSettings.wsSettings.path = p;
 }
-// EXTRA_CLIENTS="uuid1,uuid2" -> extra VLESS clients (friends / second device)
 if (process.env.EXTRA_CLIENTS) {
   for (const id of process.env.EXTRA_CLIENTS.split(",").map(s => s.trim()).filter(Boolean)) {
-    if (!inb.settings.clients.some(c => c.id === id)) inb.settings.clients.push({ id, level: 0, email: id.slice(0, 8) });
+    if (!inb.settings.clients.some(c => c.id === id)) {
+      inb.settings.clients.push({ id, level: 0, email: id.slice(0, 8) });
+    }
   }
 }
-fs.writeFileSync(process.argv[1], JSON.stringify(c, null, 2));
-console.log("[entrypoint] rendered " + process.argv[1] + " with " + inb.settings.clients.length + " client(s)");
-' "$CFG"
+fs.writeFileSync(process.env.CFG, JSON.stringify(c, null, 2));
+console.log("[entrypoint] rendered " + process.env.CFG + " (" + inb.settings.clients.length + " client(s), path " + inb.streamSettings.wsSettings.path + ")");
+'
 
-# Validate before we ever try to serve traffic.
-"$XRAY_BIN" run -test -c "$CFG" >/dev/null && echo "[entrypoint] config OK"
+"$X" run -test -c "$CFG" >/dev/null && echo "[entrypoint] config OK"
 
-# Supervise Xray: if it ever dies, bring it back in 2s. (front.js is PID 1; if *it*
-# dies the container exits and the platform restarts it, which is what we want.)
+# ---- supervise: xray dies -> back in 2s ------------------------------------
 (
+  BACKOFF=2
   while true; do
-    echo "[supervisor] starting xray $(date -u +%FT%TZ)"
-    "$XRAY_BIN" run -c "$CFG" || echo "[supervisor] xray exited with $?"
-    sleep 2
+    echo "[supervisor] xray up $(date -u +%FT%TZ)"
+    "$X" run -c "$CFG" || echo "[supervisor] xray exited $?"
+    # crash-loop protection: back off to 30s max instead of hammering the log
+    sleep "$BACKOFF"
+    [ "$BACKOFF" -lt 30 ] && BACKOFF=$(( BACKOFF * 2 ))
   done
 ) &
 
+# front.js is PID 1. If it dies the container exits and the platform restarts it.
 exec node "$APP/front.js"

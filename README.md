@@ -1,167 +1,188 @@
 # VLESS + WS + TLS — همیشه‌روشن، IP ثابت، ۰ دلار
 
-> همه‌چی آماده‌ست. تو فقط **۶ تا کلیک** روی ClawCloud باید انجام بدی.
-> بقیه‌اش (بیلد ایمیج، تست واقعی، مانیتور IP) رو GitHub Actions انجام می‌ده.
+کانفیگ اول، توضیح بعد. همه‌ی دارایی‌های §3 تو **دست‌نخورده** نگه داشته شدن:
 
-## ۰) جواب سوالی که پرسیدی
+```
+UUID:      bac2db35-df5b-47e1-a8e1-19ecd81c1ed5
+WS PATH:   /cf5d72f32b82
+PROTOCOL:  VLESS + WebSocket + TLS (پشت Cloudflare)
+ALPN:      http/1.1        FP: chrome
+CLEAN IPs: 104.17.147.22 · 162.159.36.1 · 172.67.74.1 · 104.18.0.1
+```
 
-| سوال | جواب |
+---
+
+## اول از همه: دو تا جواب قطعی
+
+**۱) سن اکانت GitHub تو:** ساخته‌شده `2025-12-08` → **۲۷۸ روز** → از شرط ۱۸۰ روزِ ClawCloud
+رد شده ✅ → کردیت ۵ دلار **هر ماه** می‌گیری، نه فقط ماه اول. کارت بانکی لازم نیست.
+(این رو با `gh api users/amiralitalebi551-sketch` گرفتم، حدس نیست.)
+
+**۲) `clawcloudrun.com` پشت Cloudflare است** — DNS می‌ده `104.21.86.207` / `172.67.136.208`.
+یعنی همون IPهای تمیزی که داری روش کار می‌کنن، SNI/Host همون hostname واقعی می‌مونه،
+و TLS هم واقعیه (نه self-signed). دقیقاً همون معمیتی که §3 توصیف کرده.
+
+## کاری که باید تو بکنی: ۶ کلیک → `DEPLOY-CLAWCLOUD.md`
+
+خلاصه‌ش:
+
+| مرحله | چی‌کار |
 |---|---|
-| سن اکانت GitHub | ساخته‌شده `2025-12-08` → **۲۷۸ روز** ✅ |
-| شرط ۱۸۰ روز ClawCloud | **ردیفه** — کردیت ۵ دلار **هر ماه** می‌گیری، نه فقط ماه اول |
-| کارت بانکی | لازم نیست. فقط لاگین با GitHub |
+| 1 | <https://console.run.claw.cloud> → Sign in with GitHub → ریجن **آلمان** |
+| 2 | Plan → ببین `Monthly Gift Credits: $5` |
+| 3 | App Launchpad → Create App |
+| 4 | Image: `node:22-alpine` · CPU `0.5` · Mem `512M` · Port `80` · **Public Access روشن** · Mount `/data` |
+| 5 | Command: `sh` / Args: `-c` و `wget -qO- <bootstrap-url> \| sh` |
+| 6 | Deploy → بعد `https://<آدرس>/__panel?t=<PANEL_TOKEN>` |
 
-## ۱) استراتژی (صادقانه)
+اون صفحه‌ی `/__panel` همه‌چی رو می‌ده: لینک‌های `vless://`، سابسکریپشن base64، وضعیت IP
+خروجی، و نتیجه‌ی خود-آزمایی §5. **بدون ترمینال، بدون CI، بدون رجیستری.**
 
-هیچ سرویس رایگانی «IP ثابت اختصاصی» نمی‌ده. چیزی که می‌شه گرفت اینه:
+`bash scripts/bootstrap-cmd.sh` رشته‌ی دقیق Command رو برات چاپ می‌کنه.
 
-| | همیشه‌روشن | IP خروجی | حجم | اسم پایدار |
-|---|---|---|---|---|
-| **A — ClawCloud Run** | ✅ کانتینر نمی‌خوابه | 🟡 NAT مشترک کلاستر (احتمالاً ثابت — باید ثابت بشه) | ❌ **۱۰ گیگ/ماه** | ✅ `*.clawcloudrun.com` |
-| **B — Cloudflare Worker** | ✅ هیچ‌وقت نمی‌خوابه | ❌ رنج IP کلودفلر | ✅ عملاً نامحدود (۱۰۰ هزار ریکوئست/روز) | ✅ `*.workers.dev` |
-| **A+B — Worker روی ClawCloud زنجیره بشه** | ✅ | ✅ IP همون NAT ثابت ClawCloud | ✅ حجم از Worker رد می‌شه | ✅ |
-
-**پیشنهاد من: هر دو رو بالا بیار.** B همیشه کار می‌کنه (حتی وقتی سهمیه ۱۰ گیگ A تموم شد)،
-و توی پنل BPB گزینه **Chain Proxy** رو روشن می‌کنی و A رو به‌عنوان بالادست می‌دی → اون‌وقت
-IP خروجی همون IP ثابت A می‌شه. این تنها ترکیب رایگانیه که هر دو شرط §2 رو می‌ده.
-
-⚠️ **تنها چیزی که من نمی‌تونم خودم انجام بدم:** لاگین کردن توی اکانت ClawCloud / Cloudflare تو
-(نیاز به مرورگر و OAuth داره و این سندباکس به اون سایت‌ها راه نداره). به‌جاش ایمیج رو
-**ساخته و هل‌داده‌شده** تحویل می‌دم که تو فقط اسمش رو Paste کنی.
-
-## ۲) PLAN A — ClawCloud Run (۶ کلیک)
-
-ایمیج از قبل روی ghcr ساخته شده (اکشن `build-image`):
+### لینک (فقط `<HOST>` عوض می‌شه)
 
 ```
-ghcr.io/amiralitalebi551-sketch/arena/xray-vless:latest
+vless://bac2db35-df5b-47e1-a8e1-19ecd81c1ed5@<HOST>:443?encryption=none&security=tls&sni=<HOST>&alpn=http%2F1.1&fp=chrome&type=ws&host=<HOST>&path=%2Fcf5d72f32b82#claw-direct
 ```
 
-1. برو <https://console.run.claw.cloud> → **Sign in with GitHub** → Authorize.
-   ریجن: **آلمان (`eu-central`)** یا **آمریکا** (سبک‌ترن؛ ژاپن/سنگاپور شلوغه).
-2. منوی بالا راست → **Plan** → باید ببینی `Monthly Gift Credits: $5`. اگه ندیدی،
-   توی Account Settings چک کن GitHub وصل باشه.
-3. **App Launchpad** → **Create App**:
-   | فیلد | مقدار |
-   |---|---|
-   | Application Name | `vless` |
-   | Image Name | `ghcr.io/amiralitalebi551-sketch/arena/xray-vless:latest` |
-   | CPU / Memory | **0.5 / 512M** (= حدود ۳ دلار از ۵ دلار؛ ۱ vCPU رو نذار، می‌شه ۵ دلار و صفر حاشیه) |
-   | Network → Container Port | `80` |
-   | Network → **Public Access** | ✅ روشن |
-   | Local Storage → Mount Path | `/data` (تاریخچه IP بعد از ریستارت نمی‌پره) |
-4. **Deploy Application** → صبر کن `Creating` بشه `Running` (~۱ دقیقه).
-5. آدرس عمومی رو کپی کن، شکلش این‌طوریه:
-   `https://vless-xxxxxxxx.eu-central.clawcloudrun.com`
-6. باز کن توی مرورگر:
-   ```
-   https://<همون‌آدرس>/__panel?t=cf5d72f32b82
-   ```
-   ← صفحه‌ای که **لینک‌های vless:// + لینک سابسکریپشن + وضعیت IP** رو نشونت می‌ده. تمام.
-
-**یک بار، دستی:** پکیج ghcr باید Public باشه تا ClawCloud بتونه بکشه‌ش. اکشن سعی می‌کنه خودش
-انجامش بده؛ اگه نشد: <https://github.com/amiralitalebi551-sketch?tab=packages> → `xray-vless`
-→ **Package settings** → **Change visibility** → **Public**. (اگه ایمیج کش نشد، ارورش همینه.)
-
-### لینک‌ها (فقط `<HOST>` رو عوض کن)
+با IP تمیز (وقتی hostname خودش فیلتره) — فقط `@` عوض می‌شه، `sni`/`host` همون `<HOST>` می‌مونن:
 
 ```
-vless://bac2db35-df5b-47e1-a8e1-19ecd81c1ed5@<HOST>:443?encryption=none&security=tls&sni=<HOST>&alpn=http%2F1.1&fp=chrome&type=ws&host=<HOST>&path=%2Fcf5d72f32b82#claw-vless-direct
+vless://bac2db35-df5b-47e1-a8e1-19ecd81c1ed5@104.17.147.22:443?encryption=none&security=tls&sni=<HOST>&alpn=http%2F1.1&fp=chrome&type=ws&host=<HOST>&path=%2Fcf5d72f32b82#claw-cf1
 ```
 
-با IP تمیز کلودفلر (وقتی خودِ hostname فیلتره) — فقط `@...` عوض می‌شه، `sni` و `host` همون `<HOST>` می‌مونن:
+همه‌شون یکجا، به‌صورت سابسکریپشن (بده به Hiddify/v2rayNG):
 
 ```
-vless://bac2db35-df5b-47e1-a8e1-19ecd81c1ed5@104.17.147.22:443?encryption=none&security=tls&sni=<HOST>&alpn=http%2F1.1&fp=chrome&type=ws&host=<HOST>&path=%2Fcf5d72f32b82#claw-vless-cf1
+https://<HOST>/__sub?t=<PANEL_TOKEN>
 ```
 
-یا همه‌شون یکجا به‌صورت سابسکریپشن:
-
-```
-https://<HOST>/__sub?t=cf5d72f32b82
-```
-
-این URL رو مستقیم بده به Hiddify / v2rayNG به‌عنوان Subscription.
-
-### تنظیمات دستی (اگه خواستی دستی تایپ کنی)
+### جدول تنظیمات دستی
 
 | فیلد | مقدار |
 |---|---|
-| Protocol | VLESS |
-| Address | `<HOST>` یا یکی از `104.17.147.22` `162.159.36.1` `172.67.74.1` `104.18.0.1` |
+| Protocol | VLESS · Encryption `none` |
+| Address | `<HOST>` یا `104.17.147.22` `162.159.36.1` `172.67.74.1` `104.18.0.1` |
 | Port | `443` |
 | UUID | `bac2db35-df5b-47e1-a8e1-19ecd81c1ed5` |
-| Encryption | none |
-| Network / Transport | `ws` |
-| WS Path | `/cf5d72f32b82` |
+| Network | `ws` · Path `/cf5d72f32b82` |
 | Host (WS header) | `<HOST>` |
 | SNI | `<HOST>` |
 | Security | TLS · ALPN `http/1.1` · FP `chrome` · AllowInsecure **خاموش** |
 
-> خبر خوب: `clawcloudrun.com` خودش پشت کلودفلره (DNS می‌ده `104.21.86.207` / `172.67.136.208`)،
-> پس همون IPهای تمیزی که داری روش کار می‌کنن و TLS هم واقعی‌ه (نه self-signed).
+---
 
-## ۳) PLAN B — Cloudflare Worker (همیشه‌روشن، بدون سقف ۱۰ گیگ)
+## استراتژی: چرا هر دو Plan
 
-دو راه، هر دو رایگان:
+هیچ سرویس رایگانی «IP ثابت اختصاصی» نمی‌ده — این رو صاف می‌گم. چیزی که می‌شه گرفت:
 
-**راه دستی (۳ دقیقه):** اکشن `sync-worker` رو بزن → `worker/worker.js` میاد توی ریپو →
-داشبورد کلودفلر → Workers & Pages → Create → **Upload** → فایل `worker.js` → Deploy.
-بعد `https://<name>.workers.dev/panel` (پسورد پیش‌فرض `admin` — **عوضش کن**).
-توی پنل: UUID و مسیر رو بذار همون‌های بالا، و **Chain Proxy** رو روشن کن و کانفیگ ClawCloud
-رو به‌عنوان بالادست بده ← این‌جوری IP ثابت می‌شه.
+| | همیشه‌روشن | IP خروجی | حجم | hostname پایدار |
+|---|---|---|---|---|
+| **A — ClawCloud Run** | ✅ کانتینر نمی‌خوابه | 🟡 NAT اشتراکی کلاستر — **باید ثابت بشه** | ❌ **۱۰ گیگ/ماه** | ✅ `*.clawcloudrun.com` |
+| **B — Cloudflare Worker** | ✅ هرگز نمی‌خوابه | ❌ رنج کلودفلر | ✅ عملاً نامحدود (۱۰۰k ریکوئست/روز) | ✅ `*.workers.dev` |
+| **B + Chain به A** | ✅ | ✅ همون IP ثابت A | ❌ از ۱۰ گیگ A کم می‌شه | ✅ |
 
-**راه خودکار:** فقط یک secret بذار:
-`CLOUDFLARE_API_TOKEN` (با دسترسی *Workers Scripts: Edit*) → بعد اکشن `deploy-worker` رو بزن.
-خودش KV می‌سازه، deploy می‌کنه، و لینک پنل رو توی Summary می‌نویسه.
+**پیشنهاد: هر دو رو بالا بیار.** B وقتی سهمیه‌ی ۱۰ گیگی A تموم شد نجاتت می‌ده،
+و پنل BPB می‌تونه هر دو کانفیگ (مستقیم و زنجیره‌شده) رو کنار هم بده → خودت انتخاب می‌کنی.
+این دقیقاً همون trade-off‌ای است که §8 گفت باید بهت بگم نه اینکه خودم انتخاب کنم:
 
-## ۴) اثبات IP ثابت (بدون ادعا، با لاگ)
+> **همیشه‌روشنِ بی‌سقف (B) ↔ IP ثابت (A).** با هر دو، مجبور نیستی انتخاب کنی.
 
-سه لایه:
+Plan B → `worker/README.md`
 
-1. **داخل خود کانتینر** یک watchdog هست: هر ۱۵ دقیقه از `api.ipify.org` و ۴ سرویس دیگه
-   می‌پرسه «چه IP‌ای ازم می‌بینی؟» و همه‌رو ذخیره می‌کنه. اگه IP عوض بشه، توی لاگ
-   `!!! EGRESS IP CHANGED` می‌زنه و توی `/__ip` شمارنده `changes` بالا می‌ره.
-   تاریخچه روی `/data` می‌مونه، یعنی **ریستارت کانتینر هم پاکش نمی‌کنه**.
-2. **اکشن `ip-monitor`** هر ۳ ساعت می‌پرسه + هندشیک WebSocket می‌زنه و یک ردیف به
-   `IP-LOG.md` اضافه می‌کنه. اگه IP عوض بشه یا تونل مرده باشه، ران **قرمز** می‌شه.
-   → بعد از چند روز، `IP-LOG.md` خودش سندِ «همیشه‌روشن + IP ثابت» هست.
-   (لازمه: Settings → Secrets and variables → Actions → **Variables** → `PROXY_HOST` = هاستنت)
-3. **اکشن `verify`** با ورودی `host` = هاستنت، کل پروتکل §5 رو از روی یک رانر واقعی اجرا
-   می‌کنه و IP‌ای که کانتینر گزارش می‌ده رو با IP‌ای که اینترنت می‌بینه **مقایسه** می‌کنه.
+---
+
+## اثبات IP ثابت — سه لایه، بدون ادعا
+
+1. **watchdog داخل کانتینر**: هر ۱۵ دقیقه از `api.ipify.org` + ۴ سرویس دیگه می‌پرسه
+   «چه IP‌ای ازم می‌بینی؟». اگه عوض بشه توی لاگ `!!! EGRESS IP CHANGED` می‌زنه و
+   شمارنده‌ی `changes` توی `/__ip` بالا می‌ره. تاریخچه روی `/data` می‌مونه →
+   **ریستارت کانتینر پاکش نمی‌کنه**، پس شرط §5.3 (IP بعد از ریستارت) خودکار پوشش داده می‌شه.
+2. **`/__verify`** = پروتکل §5 از سمت خروجی، بدون نیاز به CI:
+   ۵ نمونه IP، ۵ بار `generate_204`، ۶ سایت فیلترشده، تست سرعت ۱۰ مگابایتی از
+   `speed.cloudflare.com`، و org/country خروجی. خودش هر ۶ ساعت اجرا می‌شه.
+   ```
+   https://<HOST>/__verify?t=<PANEL_TOKEN>&fresh=1
+   ```
+3. **`ip-monitor.yml`** (اگه اکشن‌ها فعال بشن): هر ۳ ساعت هندشیک WS می‌زنه + IP رو
+   می‌خونه و یک ردیف به `IP-LOG.md` اضافه می‌کنه. IP عوض بشه یا تونل بمیره → ران **قرمز**.
+   بعد از چند روز، `IP-LOG.md` خودش سندِ «همیشه‌روشن + IP ثابت» است.
+
+از بیرون هم:
 
 ```bash
-# هر وقت خواستی خودت چک کنی (روی هر لینوکس/مک):
-HOST=<HOST> bash scripts/test-remote.sh
+bash scripts/check-endpoint.sh <HOST>          # 404 / 400 / 101 / IPهای تمیز
+HOST=<HOST> bash scripts/test-remote.sh        # کل §5 + کراس‌چک IP کانتینر با IP اینترنت
+bash scripts/make-link.sh <HOST>               # لینک‌ها + سابسکریپشن
 ```
 
-## ۵) نقشه‌ی ریپو
+---
+
+## چی واقعاً تست شد
+
+**۸۱ تست، همه سبز** — جزئیات کامل و لاگ‌ها در `TESTS.md`.
+
+| تست | نتیجه |
+|---|---|
+| `node scripts/lint-config.js` (۲۶ بررسی، شامل تله‌های §6) | **26/26** |
+| `node scripts/test-front.js` (روتر، ۴۰۴/۴۰۰/۱۰۱، payload بایت‌دقیق، TLS) | **34/34** |
+| `bash scripts/test-bootstrap.sh` (کل زنجیره‌ی deploy + overrideهای env) | **21/21** |
+
+تست‌ها یک **باگ واقعی** پیدا کردن: `front.js` هدر رو با `end()` می‌فرستاد و بدنه رو بعدش
+با `write()` → بدنه بی‌صدا دور ریخته می‌شد و `/__sub` خالی برمی‌گشت. درست شد.
+
+**چی تست نشد و چرا:** این سندباکس فقط به `github.com`/`api.github.com`/`npmjs`/`pypi`
+راه داره؛ `objects.githubusercontent.com` بسته‌ست پس باینری واقعی xray-core اینجا قابل
+دانلود نبود، و خروجی به اینترنت آزاد هم بسته‌ست (`google.com` → `000`). پس §5 روی
+**اندپوینت واقعی** فقط یا روی رانر GitHub اجرا می‌شه یا توسط `/__verify` داخل کانتینر.
+هیچ‌کدوم از این دو هنوز اجرا نشدن — **هیچ ادعای اثبات‌نشده‌ای درباره‌ی IP ثابت نمی‌کنم.**
+
+---
+
+## نقشه‌ی ریپو
 
 ```
-server/Dockerfile        ایمیج (node:22-alpine + xray-core، amd64 و arm64)
-server/config.json       کانفیگ Xray: VLESS+WS روی 127.0.0.1:2087، بدون geoip.dat (CIDR صریح)
-server/front.js          روتر TCP + پنل + watchdog IP  (همون چیزی که /__panel رو می‌ده)
-server/entrypoint.sh     رندر کانفیگ از env + سوپروایزر xray
-scripts/verify.sh        پروتکل §5 (۱۰ بار کانکت، ۱۰ نمونه IP، سایت‌های فیلتر، سرعت)
-scripts/check-endpoint.sh   سلامت تونل: / باید ۴۰۴، WS خراب ۴۰۰، WS سالم ۱۰۱
-scripts/make-link.sh     هاست → لینک vless:// + سابسکریپشن base64
-scripts/test-remote.sh   تست کامل یک اندپوینت واقعی + کراس‌چک IP
-scripts/ci-local-stack.sh   کل زنجیره روی یک رانر: TLS و plain هر دو
-scripts/render-client.js کانفیگ کلاینت Xray از روی env
-.github/workflows/       build-image · verify · ip-monitor · sync-worker · deploy-worker
-DEPLOY-CLAWCLOUD.md      نسخه‌ی موشکافانه‌ی کلیک‌ها + عیب‌یابی
-worker/                  Plan B (BPB-Worker-Panel)
+server/Dockerfile          ایمیج (node:22-alpine + xray-core، amd64 و arm64)
+server/config.json         Xray: VLESS+WS روی 127.0.0.1:2087، بدون geoip.dat (CIDR صریح)
+server/front.js            روتر TCP + پنل + watchdog IP + خود-آزمایی §5
+server/entrypoint.sh       رندر کانفیگ از env + سوپروایزر با backoff
+scripts/bootstrap.sh       مسیر بدون CI: ایمیج خام → سرور کامل
+scripts/bootstrap-cmd.sh   رشته‌ی دقیق Command برای paste کردن
+scripts/lint-config.js     ۲۶ بررسی استاتیک روی کانفیگ
+scripts/test-front.js      ۳۴ تست روی روتر
+scripts/test-bootstrap.sh  ۲۱ تست روی زنجیره‌ی deploy
+scripts/test-all.sh        هر سه تا
+scripts/verify.sh          پروتکل §5 (روی هر ماشینی)
+scripts/check-endpoint.sh  سلامت تونل: ۴۰۴/۴۰۰/۱۰۱ + IPهای تمیز
+scripts/make-link.sh       هاست → vless:// + سابسکریپشن base64
+scripts/test-remote.sh     تست کامل اندپوینت واقعی + کراس‌چک IP
+scripts/ci-local-stack.sh  کل زنجیره روی یک رانر (TLS و plain هر دو)
+scripts/render-client.js   کانفیگ کلاینت Xray از env
+scripts/get-xray.sh        دانلود xray-core
+ci/                        اکشن‌ها (چرا اینجا؟ → ci/README.md)
+worker/                    Plan B
+DEPLOY-CLAWCLOUD.md        کلیک‌به‌کلیک + هزینه + عیب‌یابی
+TESTS.md                   چی تست شد، با لاگ
 ```
 
-## ۶) متغیرهای env ایمیج (همه اختیاری، پیش‌فرض‌ها همون دارایی‌های تو هستن)
+## env های کانتینر (همه اختیاری — پیش‌فرض‌ها همون دارایی‌های تو)
 
 | env | پیش‌فرض |
 |---|---|
 | `UUID` | `bac2db35-df5b-47e1-a8e1-19ecd81c1ed5` |
 | `WS_PATH` | `/cf5d72f32b82` |
-| `PANEL_TOKEN` | `cf5d72f32b82` — **حتماً عوضش کن** (کلید `/__panel` و `/__sub` هست) |
+| `PANEL_TOKEN` | `cf5d72f32b82` — **عوضش کن** |
 | `PORT` / `XRAY_PORT` | `80` / `2087` |
 | `IP_SAMPLE_SECONDS` | `900` |
+| `VERIFY_EVERY_MINUTES` | `360` |
 | `CLEAN_IPS` | `104.17.147.22,162.159.36.1,172.67.74.1,104.18.0.1` |
-| `EXTRA_CLIENTS` | خالی — UUID اضافه برای دستگاه دوم/دوست |
-| `TLS_PORT` + `TLS_CERT` + `TLS_KEY` | خاموش — برای VPS خام (Plan C) که خودش TLS می‌خواد |
+| `EXTRA_CLIENTS` | خالی — UUID اضافه برای دستگاه دوم |
+| `TLS_PORT`+`TLS_CERT`+`TLS_KEY` | خاموش — برای VPS خام (Plan C/D) |
+| `BOOT_REF` / `BOOT_REPO` | برنچ/ریپویی که bootstrap ازش می‌خونه |
+
+## دو درخواست از تو (هر کدوم یک کلیک)
+
+1. **اجازه‌ی `workflows`** به اپ GitHub (`ci/README.md` → راه ۱). بدون اون من نمی‌تونم
+   ایمیج رو بسازم، §5 رو روی رانر اجرا کنم، یا `IP-LOG.md` رو نگه دارم.
+2. **هاستنت** بعد از deploy. باهاش `check-endpoint.sh` و لینک نهایی رو دقیق می‌کنم.

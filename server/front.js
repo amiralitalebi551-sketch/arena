@@ -45,11 +45,15 @@ const CFG = {
   cleanIPs: (env.CLEAN_IPS || '104.17.147.22,162.159.36.1,172.67.74.1,104.18.0.1')
     .split(',').map((s) => s.trim()).filter(Boolean),
   sampleMs: Math.max(60, parseInt(env.IP_SAMPLE_SECONDS || '900', 10)) * 1000,
-  stateFile: env.STATE_FILE || '/data/ip-state.json',
+  stateFile: env.STATE_FILE || ((env.STATE_DIR || '/data').replace(/\/+$/, '') + '/ip-state.json'),
   echo: (env.IP_ECHO_URLS ||
     'https://api.ipify.org,https://ifconfig.me/ip,https://api-ipv4.ip.sb/ip,https://ipv4.icanhazip.com,https://checkip.amazonaws.com')
     .split(',').map((s) => s.trim()).filter(Boolean),
   remark: env.REMARK || 'claw-vless',
+  sites: (env.VERIFY_SITES || 'youtube.com,instagram.com,x.com,telegram.org,chat.openai.com,discord.com')
+    .split(',').map((x) => x.trim()).filter(Boolean),
+  speedURL: env.VERIFY_SPEED_URL || 'https://speed.cloudflare.com/__down?bytes=10000000',
+  verifyEveryMs: Math.max(600, parseInt(env.VERIFY_EVERY_MINUTES || '360', 10)) * 60000,
 };
 
 const startedAt = Date.now();
@@ -57,12 +61,14 @@ const log = (...a) => console.log(new Date().toISOString(), '[front]', ...a);
 
 /* ------------------------------------------------------------------ state */
 
+let stateWarned = false;
 let state = {
   createdAt: new Date().toISOString(),
   bootId: Math.random().toString(36).slice(2, 10),
   current: null,
   firstSeen: null,
   restarts: 0,
+  verify: null,  // last self-test
   samples: [],   // [{ts, ip, via}]
   changes: [],   // [{ts, from, to}]
   errors: 0,
@@ -86,7 +92,7 @@ function saveState() {
     const tmp = CFG.stateFile + '.tmp';
     fs.writeFileSync(tmp, JSON.stringify(state));
     fs.renameSync(tmp, CFG.stateFile);
-  } catch (e) { log('state save failed (no writable volume?):', e.message); }
+  } catch (e) { if (!stateWarned) { stateWarned = true; log('state save failed (no writable volume?):', e.message); } }
 }
 
 /* --------------------------------------------------------------- watchdog */
@@ -138,6 +144,110 @@ async function watchLoop() {
   }
 }
 
+
+/* --------------------------------------------------------------- self-test */
+/* Runs the §5 protocol from INSIDE the container, i.e. against the very egress
+ * path your traffic will use. This is the part nobody else can fake: it proves
+ * the exit IP, that censored sites are reachable from it, and how fast it is.  */
+
+async function fetchCode(url, timeout) {
+  try {
+    const r = await fetch(url, {
+      signal: AbortSignal.timeout(timeout || 20000),
+      redirect: 'follow',
+      headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' },
+    });
+    return r.status;
+  } catch (e) { return 'ERR:' + (e.name === 'TimeoutError' ? 'timeout' : e.message).slice(0, 24); }
+}
+
+async function measureSpeed(url, maxMs) {
+  const t0 = Date.now();
+  let bytes = 0;
+  try {
+    const r = await fetch(url, { signal: AbortSignal.timeout(maxMs || 45000) });
+    const rd = r.body.getReader();
+    for (;;) {
+      const { done, value } = await rd.read();
+      if (done) break;
+      bytes += value.length;
+      if (Date.now() - t0 > (maxMs || 45000)) { try { rd.cancel(); } catch (e) {} break; }
+    }
+  } catch (e) { return { bytes, error: e.message.slice(0, 60) }; }
+  const sec = (Date.now() - t0) / 1000 || 0.001;
+  return { bytes, seconds: +sec.toFixed(2), mbps: +((bytes * 8) / sec / 1e6).toFixed(2) };
+}
+
+let verifyBusy = false;
+
+async function runSelfTest(rounds) {
+  if (verifyBusy) return { busy: true, note: 'a self-test is already running' };
+  verifyBusy = true;
+  const t0 = Date.now();
+  const R = Math.max(1, Math.min(20, rounds || 5));
+  const out = { startedAt: new Date().toISOString(), rounds: R };
+  try {
+    // 1) connectivity
+    const conn = [];
+    for (let i = 0; i < R; i++) {
+      conn.push(await fetchCode('https://www.google.com/generate_204', 15000));
+    }
+    out.connectivity = { codes: conn, ok: conn.filter((c) => c === 204).length, total: R };
+
+    // 2) egress IP, sampled
+    const ips = [];
+    for (let i = 0; i < R; i++) {
+      const r = await sampleIP();
+      ips.push(r ? r.ip : 'ERR');
+    }
+    const uniq = [...new Set(ips.filter((x) => x !== 'ERR'))];
+    out.egressIP = { samples: ips, distinct: uniq, isStaticNow: uniq.length === 1 };
+    out.egressIP.current = uniq.length === 1 ? uniq[0] : state.current;
+
+    // 3) censored / blocked sites
+    out.sites = {};
+    for (const s of CFG.sites) out.sites[s] = await fetchCode('https://' + s + '/', 25000);
+    out.sitesDead = Object.entries(out.sites).filter(([, v]) => String(v).startsWith('ERR')).map(([k]) => k);
+
+    // 4) throughput
+    out.throughput = await measureSpeed(CFG.speedURL, 45000);
+
+    // 5) identity of the exit
+    const ip = out.egressIP.current;
+    if (ip) {
+      try {
+        const g = await fetch('https://ipinfo.io/' + ip + '/json', { signal: AbortSignal.timeout(12000) });
+        const j = await g.json();
+        out.exit = { ip, org: j.org, city: j.city, region: j.region, country: j.country };
+      } catch (e) { out.exit = { ip, org: 'lookup failed' }; }
+    }
+
+    out.seconds = +((Date.now() - t0) / 1000).toFixed(1);
+    out.finishedAt = new Date().toISOString();
+    out.verdict = {
+      connectivity: out.connectivity.ok === R,
+      ipStaticNow: out.egressIP.isStaticNow,
+      ipStaticOverTime: state.changes.length === 0 && state.samples.length > 1,
+      allSitesReachable: out.sitesDead.length === 0,
+      fastEnough: (out.throughput.mbps || 0) > 1,
+    };
+    out.verdict.PASS = Object.values(out.verdict).every(Boolean);
+    state.verify = out;
+    saveState();
+    log('self-test done in ' + out.seconds + 's  PASS=' + out.verdict.PASS +
+        '  ip=' + out.egressIP.current + '  mbps=' + out.throughput.mbps);
+    return out;
+  } finally { verifyBusy = false; }
+}
+
+async function verifyLoop() {
+  await new Promise((r) => setTimeout(r, 25000)); // let xray settle first
+  for (;;) {
+    try { await runSelfTest(5); } catch (e) { log('self-test crashed:', e.message); }
+    await new Promise((r) => setTimeout(r, CFG.verifyEveryMs));
+  }
+}
+
 /* ------------------------------------------------------------------ links */
 
 function cleanHost(reqHost) {
@@ -177,16 +287,17 @@ function subBase64(host) {
 
 function httpRes(sock, code, body, type, extra) {
   const b = Buffer.isBuffer(body) ? body : Buffer.from(String(body), 'utf8');
-  const head = [
+  // NOTE: end() first and write() after loses the body (write-after-end). One
+  // single end() with headers+body concatenated is the only correct way.
+  const head = Buffer.from([
     `HTTP/1.1 ${code}`,
     `content-type: ${type || 'text/plain; charset=utf-8'}`,
     `content-length: ${b.length}`,
     'connection: close',
     'cache-control: no-store',
     ...(extra || []),
-  ].join('\r\n');
-  try { sock.end(head + '\r\n\r\n'); } catch (e) { /* gone */ }
-  try { sock.write(b); } catch (e) { /* gone */ }
+  ].join('\r\n') + '\r\n\r\n', 'latin1');
+  try { sock.end(Buffer.concat([head, b])); } catch (e) { /* client already gone */ }
 }
 
 function ok(sock, q, hostHeader) {
@@ -222,6 +333,14 @@ function handleMagic(sock, pathname, q, hostHeader) {
   }
 
   if (pathname === '/__sub') return ok(sock, q, hostHeader);
+
+  if (pathname === '/__verify') {
+    if (!q.fresh && state.verify) return httpRes(sock, '200 OK', JSON.stringify(state.verify, null, 2), 'application/json');
+    sock.setTimeout(0);
+    return runSelfTest(parseInt(q.rounds || '5', 10)).then(
+      (r) => httpRes(sock, '200 OK', JSON.stringify(r, null, 2), 'application/json'),
+      (e) => httpRes(sock, '500 Internal Server Error', String(e && e.message || e)));
+  }
 
   if (pathname === '/__links') {
     const rows = allLinks(host).map((l) => l.url).join('\n');
@@ -261,6 +380,15 @@ b.ok{color:#4ade80}b.bad{color:#f87171}.muted{color:#93a0c4}
 </div>
 ${links.map((l) => `<div class="card"><b>${esc(l.remark)}</b> <span class="muted">(${esc(l.kind)}${l.ip ? ' · ' + esc(l.ip) : ''})</span>
 <button onclick="c(this.nextElementSibling.textContent)">کپی</button><pre dir="ltr">${esc(l.url)}</pre></div>`).join('\n')}
+${state.verify ? `<div class="card"><b>آخرین خود-آزمایی (§5)</b>
+<div class="muted">${esc(state.verify.finishedAt || '')} · ${esc(state.verify.seconds || '?')}s</div>
+<pre dir="ltr">${esc(JSON.stringify(state.verify.verdict, null, 2))}</pre>
+<pre dir="ltr">ip      : ${esc(JSON.stringify(state.verify.egressIP && state.verify.egressIP.distinct))}
+exit    : ${esc(JSON.stringify(state.verify.exit || {}))}
+speed   : ${esc(state.verify.throughput && state.verify.throughput.mbps)} Mbit/s
+connect : ${esc(state.verify.connectivity && state.verify.connectivity.ok)}/${esc(state.verify.connectivity && state.verify.connectivity.total)} x 204
+sites   : ${esc(JSON.stringify(state.verify.sites, null, 0))}</pre>
+<button onclick="location.href='/__verify?t=${esc(CFG.token)}&fresh=1'">اجرای دوباره</button></div>` : ''}
 <div class="card muted">
   <div>UUID <code dir="ltr">${esc(CFG.uuid)}</code></div>
   <div>WS path <code dir="ltr">${esc(CFG.wsPath)}</code></div>
@@ -370,8 +498,9 @@ if (CFG.tlsPort > 0 && CFG.tlsCert && CFG.tlsKey) {
   } catch (e) { log('TLS mode disabled:', e.message); }
 }
 
-log('panel  /__panel?t=<token>  /__ip  /__sub  /__links  /__health   token=' + CFG.token);
+log('panel  /__panel?t=<token>  /__ip  /__sub  /__links  /__verify  /__health   token=' + CFG.token);
 watchLoop();
+verifyLoop();
 
 for (const sig of ['SIGTERM', 'SIGINT']) {
   process.on(sig, () => { saveState(); process.exit(0); });
