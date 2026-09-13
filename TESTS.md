@@ -15,16 +15,32 @@
 |---|---|---|
 | لینتر کانفیگ (۲۶ بررسی، شامل تله‌های §6) | `node scripts/lint-config.js` | **26/26 PASS** |
 | تست واحد/یکپارچگی `front.js` | `node scripts/test-front.js` | **34/34 PASS** |
-| تست زنجیره‌ی `bootstrap → entrypoint → render → front` | `bash scripts/test-bootstrap.sh` | **21/21 PASS** |
-| همه‌ش با هم | `bash scripts/test-all.sh` | **81/81 PASS** |
+| زنجیره‌ی `bootstrap → entrypoint → render → front` (فرم shell) | `bash scripts/test-bootstrap.sh` | **21/21 PASS** |
+| زنجیره‌ی deploy **فرم اصلی**: `NODE_OPTIONS` + بوت آفلاین از کش | `bash scripts/test-bootstrap-mjs.sh` | **27/27 PASS** |
+| همه‌ش با هم | `bash scripts/test-all.sh` | **108/108 PASS** |
 
-### باگ واقعی‌ای که تست پیدا کرد (و درست شد)
+### باگ‌های واقعی‌ای که تست پیدا کرد (و درست شدن)
+
+**۱) fork bomb از راه `NODE_OPTIONS`.** مسیر اصلی deploy از `NODE_OPTIONS=--import=...` استفاده
+می‌کنه. `NODE_OPTIONS` به **هر** پروسه‌ی فرزند ارث می‌رسه — یعنی `node -e`‌ای که کانفیگ رو رندر
+می‌کنه، و حتی `xray version` وقتی که (توی تست) یک اسکریپت node بود، دوباره لودر رو import
+می‌کرد و کل bootstrap از اول اجرا می‌شد. بی‌نهایت.
+تست PHASE 1 دقیقاً همین‌جا گیر کرد (لاگ بعد از دانلود xray ساکت شد). حالا هر spawn در
+`bootstrap.mjs` از `CLEAN_ENV` با `NODE_OPTIONS: ''` استفاده می‌کنه و `entrypoint.sh` هم
+`unset NODE_OPTIONS` داره.
+
+**۲) بدنه‌ی HTTP دور ریخته می‌شد.**
 
 `front.js` اولش هدر HTTP رو با `sock.end()` می‌فرستاد و **بعد** بدنه رو با `sock.write()`.
 `end()` نیمه‌بستن جریان است، پس `write()` بعدش بی‌صدا دور ریخته می‌شد →
 `/__sub` و `/__panel` و `/__ip` کد ۲۰۰ می‌دادن ولی **بدنه خالی**. یعنی لینک سابسکریپشن
 کار نمی‌کرد. تست `__sub is valid base64 with 3 links` همین رو لو داد.
-الان هدر+بدنه در یک `end()` واحدconcat می‌شن. → **اگر تست نمی‌نوشتم، این رو بهت می‌دادم و کار نمی‌کرد.**
+الان هدر+بدنه در یک `end()` واحد concat می‌شن.
+
+**۳) کش لودر به `/data` سخت‌کد شده بود** و `STATE_DIR` رو نادیده می‌گرفت → در تست، فاز
+«بوت آفلاین» شکست می‌خورد. حالا مسیر کش از `STATE_DIR` میاد.
+
+→ **اگر تست نمی‌نوشتم، هیچ‌کدوم از این سه تا رو نمی‌فهمیدم و بهت یک چیز خراب می‌دادم.**
 
 ### چه چیزهایی دقیقاً اثبات شدن
 
@@ -52,6 +68,21 @@
 - به‌جاش همه‌ی CIDRهای خصوصی/لوکال **صریح** block شدن، از جمله `169.254.0.0/16`
   (متادیتای ابر) و `100.64.0.0/10` → هیچ SSRF‌ای به سمت کلاستر k8s ممکن نیست
 - `freedom` اولین outbound است (مسیر پیش‌فرض) · blackhole تگ‌دار · DNS روی `UseIPv4`
+
+### فرم اصلی deploy (تست `test-bootstrap-mjs.sh`)
+
+**PHASE 1 — بوت سرد، همه‌چیز از HTTP:**
+`NODE_OPTIONS` واقعی (همون رشته‌ی base64 که paste می‌کنی) + `node </dev/null` اجرا می‌شه،
+لودر `bootstrap.mjs` رو می‌گیره، اون یک **zip ساختگیِ xray-core** رو دانلود و unzip می‌کنه،
+`geoip.dat` رو کپی می‌کنه، کانفیگ رو رندر می‌کنه، `xray -test` پاس می‌شه، سوپروایزر بالا میاد،
+و بعد: `GET /` → ۴۰۴ · `/__health` → ۲۰۰ · هندشیک WS روی مسیر override → **۱۰۱** ·
+مسیر پیش‌فرض قدیمی → ۴۰۴ · `/__ip` با توکن اشتباه → ۴۰۴ · `/__sub` → لینک درست.
+
+**PHASE 2 — «اینترنت» رو می‌کشم و ریستارت می‌کنم:**
+سرور HTTP خاموش می‌شه، `BOOT_URL` به یک پورت مرده pointing می‌شه، و کانتینر دوباره بالا میاد.
+لاگ: `[boot-loader] cached boot (fetch failed)` → `cache hit front.js/config.json/entrypoint.sh`
+→ `xray cached` → همه‌ی اندپوینت‌ها دوباره ۴۰۴/۲۰۰/۱۰۱.
+**یعنی قطعی GitHub پروکسی تو رو از کار نمی‌ندازه** (به شرط mount بودن `/data`).
 
 زنجیره‌ی bootstrap (شبیه‌سازی دقیق کانتینر ClawCloud):
 

@@ -63,13 +63,49 @@ ghcr.io/amiralitalebi551-sketch/arena/xray-vless:latest
 
 ## ۴. مسیر B — بدون CI، بدون رجیستری (الان، همین امروز کار می‌کنه)
 
-Image Name:
+`bash scripts/bootstrap-cmd.sh` همین مقادیر رو برات چاپ می‌کنه. سه فرم داره؛ **فرم A اصلی است.**
+
+### فرم A — Command فقط یک کلمه، بقیه‌اش دو تا Environment Variable
+
+**Command:** `node` ← فقط همین. **Args:** خالی.
+
+`BOOT_URL`:
 
 ```
-node:22-alpine
+https://raw.githubusercontent.com/amiralitalebi551-sketch/arena/arena/01a09a53-arena/scripts/bootstrap.mjs
 ```
 
-Command / Args (دقیقاً از `bash scripts/bootstrap-cmd.sh` کپی کن):
+`NODE_OPTIONS`:
+
+```
+--import=data:text/javascript;base64,Y29uc3QgdT1wcm9jZXNzLmVudi5CT09UX1VSTCxjPXByb2Nlc3MuZW52LkJPT1RfQ3x8KChwcm9jZXNzLmVudi5TVEFURV9ESVJ8fCIvZGF0YSIpKyIvYmMubWpzIiksZj1hd2FpdCBpbXBvcnQoIm5vZGU6ZnMiKTsgbGV0IHQsZT0iIjsgdHJ5e2NvbnN0IHI9YXdhaXQgZmV0Y2godSx7c2lnbmFsOkFib3J0U2lnbmFsLnRpbWVvdXQoMzAwMDApfSk7aWYoci5vayl0PWF3YWl0IHIudGV4dCgpfWNhdGNoKHgpe2U9eC5tZXNzYWdlfSBpZighdHx8dC5sZW5ndGg8OTkpe3RyeXt0PWYucmVhZEZpbGVTeW5jKGMsInV0ZjgiKTtjb25zb2xlLmxvZygiW2Jvb3QtbG9hZGVyXSBjYWNoZWQgYm9vdCAoIitlKyIpIil9Y2F0Y2goeCl7dGhyb3cgbmV3IEVycm9yKCJCT09UX1VSTCBmYWlsZWQ6ICIrZSl9fSB0cnl7Zi53cml0ZUZpbGVTeW5jKGMsdCl9Y2F0Y2goeCl7fSBhd2FpdCBpbXBvcnQoImRhdGE6dGV4dC9qYXZhc2NyaXB0O2Jhc2U2NCwiK0J1ZmZlci5mcm9tKHQpLnRvU3RyaW5nKCJiYXNlNjQiKSk7
+```
+
+> بعد از merge شدن PR به `main`، فقط `BOOT_URL` رو به این عوض کن (یا
+> `BOOT_REF=main bash scripts/bootstrap-cmd.sh` رو بزن):
+> ```
+> https://raw.githubusercontent.com/amiralitalebi551-sketch/arena/main/scripts/bootstrap.mjs
+> ```
+> اگه فراموش کردی هم فاجعه نیست: لودر خودش رو توی `/data/bc.mjs` کش می‌کنه، پس حتی
+> اگه اون برنچ پاک بشه کانتینر از روی کش بالا میاد (این با تست PHASE 2 اثبات شده).
+
+**چرا این فرم از همه مطمئن‌تره:**
+
+1. بیلد رسمی node فروشگاه CA خودش رو **داخل باینری** داره، پس HTTPS کار می‌کنه حتی وقتی
+   `node:22-alpine` نه `curl` داره نه پکیج `ca-certificates`. (از سورس `nodejs/docker-node`
+   چک کردم: `curl` فقط توی `.build-deps-yarn` نصب می‌شه که بعد از بیلد پاک می‌شه.)
+2. هیچ‌جا shell-quote نمی‌شه → ابهامِ «کادر Command رو چطور تکه‌تکه می‌کنن» صفر می‌شه.
+3. `Command: node` امنه چون entrypoint واقعیِ ایمیج این است:
+   ```sh
+   if [ "${1#-}" != "${1}" ] || [ -z "$(command -v "${1}")" ] || { [ -f "${1}" ] && ! [ -x "${1}" ]; }; then
+     set -- node "$@"
+   fi
+   exec "$@"
+   ```
+   `command -v node` پیدا می‌شه → هیچ بازنویسی‌ای نمی‌شه → `exec node` → `NODE_OPTIONS` اجرا می‌شه.
+   (به همین دلیل `sh` هم Command امنیه.)
+
+### فرم B — اگه نتونستی Environment Variable اضافه کنی
 
 ```
 Command : sh
@@ -77,25 +113,39 @@ Args    : -c
           wget -qO- https://raw.githubusercontent.com/amiralitalebi551-sketch/arena/arena/01a09a53-arena/scripts/bootstrap.sh | sh
 ```
 
-> اگه فقط **یک** کادر Command داری (نه Command+Args جدا)، این رو بذار:
-> ```
-> sh -c wget$IFS-qO-$IFShttps://raw.githubusercontent.com/amiralitalebi551-sketch/arena/arena/01a09a53-arena/scripts/bootstrap.sh$IFS|$IFSsh
-> ```
-> (`$IFS` جانشین فاصله‌ست چون اون کادر روی فاصله تکه‌تکه می‌شه.)
->
-> **صادقانه:** من نتونستم از این سندباکس semantics دقیق اون کادر رو تست کنم
-> (راهی به `console.run.claw.cloud` ندارم). اگه اپ `CreateContainerError` یا
-> `exec format error` داد، فرم دیگه رو امتحان کن؛ لاگ کانتینر دقیق می‌گه چی شده.
+### فرم C — اگه فقط **یک** کادر Command داری (روی فاصله تکه‌تکه می‌شه)
 
-بعد از بالا اومدن، `bootstrap.sh`:
-1. `front.js` / `config.json` / `entrypoint.sh` رو از ریپو می‌گیره و **کش می‌کنه روی `/data`**
-   (پس ریستارت بعدی حتی اگه GitHub down باشه بالا میاد)
-2. `xray-core` رو دانلود می‌کنه (یک‌بار؛ بعدش از `/data` کش می‌شه → بوت ~۲ ثانیه)
-3. کانفیگ رو از env رندر و با `xray -test` اعتبارسنجی می‌کنه
-4. سوپروایزر xray + روتر `front.js` رو اجرا می‌کنه
+```
+sh -c wget$IFS-qO-$IFShttps://raw.githubusercontent.com/amiralitalebi551-sketch/arena/arena/01a09a53-arena/scripts/bootstrap.sh$IFS|$IFSsh
+```
 
-بعد از merge شدن PR به `main` بهتره `BOOT_REF=main` رو به‌عنوان متغیر محیطی بذاری
-تا به برنچ موقت این جلسه وابسته نباشی.
+`$IFS` جانشین فاصله‌ست. زشت است، ولی زیر تفسیر «آرایه‌ی k8s» کار می‌کنه.
+
+> **صادقانه:** semantics دقیق کادر Commandِ ClawCloud رو نتونستم از این سندباکس تست کنم
+> (راهی به `console.run.claw.cloud` ندارم). فرم A اصلاً بهش وابسته نیست. اگه فرم B/C خطای
+> `CreateContainerError` یا `exec format error` داد، لاگ کانتینر دقیق می‌گه چی شده و فرم A رو بذار.
+
+### بعد از بالا اومدن چه اتفاقی می‌افته
+
+1. لودر `scripts/bootstrap.mjs` رو می‌گیره و اجرا می‌کنه
+2. `front.js` / `config.json` / `entrypoint.sh` از ریپو گرفته و **روی `/data` کش** می‌شن
+3. `xray-core` دانلود و unzip می‌شه (یک بار؛ بعدش از `/data` → بوت ~۲ ثانیه)
+4. کانفیگ از env رندر و با `xray -test` اعتبارسنجی می‌شه
+5. سوپروایزر xray (با backoff) + روتر `front.js` بالا میان
+
+لاگ کانتینر باید این خط‌ها رو نشون بده:
+
+```
+[boot] server files ready
+[boot] xray vXX.X.X from Xray-linux-64.zip (NN.N MB)
+[boot] supervisor started (pid N)
+[entrypoint] config OK
+[front] plain  listening on 0.0.0.0:80 -> ws path /cf5d72f32b82 -> xray 127.0.0.1:2087
+[front] egress ip = <IP خروجی تو>
+```
+
+اون `<IP خروجی تو>` همون چیزیه که سایت‌ها می‌بینن. **هر ۱۵ دقیقه** نمونه‌برداری می‌شه و
+اگه عوض بشه لاگ می‌زنه `!!! EGRESS IP CHANGED`.
 
 ## ۵. گرفتن لینک‌ها
 

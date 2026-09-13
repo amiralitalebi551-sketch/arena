@@ -8,6 +8,10 @@
 # ============================================================================
 set -eu
 
+# Belt and braces: never let an inherited NODE_OPTIONS re-trigger a boot loader
+# in the child node processes we spawn below.
+unset NODE_OPTIONS || true
+
 APP="${APP_DIR:-/app}"
 DATA="${STATE_DIR:-/data}"
 mkdir -p "$DATA" 2>/dev/null || DATA=/tmp

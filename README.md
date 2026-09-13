@@ -32,13 +32,15 @@ CLEAN IPs: 104.17.147.22 · 162.159.36.1 · 172.67.74.1 · 104.18.0.1
 | 2 | Plan → ببین `Monthly Gift Credits: $5` |
 | 3 | App Launchpad → Create App |
 | 4 | Image: `node:22-alpine` · CPU `0.5` · Mem `512M` · Port `80` · **Public Access روشن** · Mount `/data` |
-| 5 | Command: `sh` / Args: `-c` و `wget -qO- <bootstrap-url> \| sh` |
+| 5 | Command: `node` (فقط همین یک کلمه) · Args: خالی · دو تا Environment Variable: `BOOT_URL` و `NODE_OPTIONS` |
 | 6 | Deploy → بعد `https://<آدرس>/__panel?t=<PANEL_TOKEN>` |
 
 اون صفحه‌ی `/__panel` همه‌چی رو می‌ده: لینک‌های `vless://`، سابسکریپشن base64، وضعیت IP
 خروجی، و نتیجه‌ی خود-آزمایی §5. **بدون ترمینال، بدون CI، بدون رجیستری.**
 
-`bash scripts/bootstrap-cmd.sh` رشته‌ی دقیق Command رو برات چاپ می‌کنه.
+`bash scripts/bootstrap-cmd.sh` رشته‌ی دقیقِ هر دو متغیر رو برات چاپ می‌کنه (مقادیر آماده‌ی کپی
+هم پایین‌تر در `DEPLOY-CLAWCLOUD.md` هست). هیچ اسکریپتی توی کادر Command نمی‌ریزی، پس هیچ
+مشکل quoting/splitting‌ای هم پیش نمیاد.
 
 ### لینک (فقط `<HOST>` عوض می‌شه)
 
@@ -121,13 +123,14 @@ bash scripts/make-link.sh <HOST>               # لینک‌ها + سابسکر�
 
 ## چی واقعاً تست شد
 
-**۸۱ تست، همه سبز** — جزئیات کامل و لاگ‌ها در `TESTS.md`.
+**۱۰۸ تست، همه سبز** — جزئیات کامل و لاگ‌ها در `TESTS.md`.
 
 | تست | نتیجه |
 |---|---|
 | `node scripts/lint-config.js` (۲۶ بررسی، شامل تله‌های §6) | **26/26** |
 | `node scripts/test-front.js` (روتر، ۴۰۴/۴۰۰/۱۰۱، payload بایت‌دقیق، TLS) | **34/34** |
-| `bash scripts/test-bootstrap.sh` (کل زنجیره‌ی deploy + overrideهای env) | **21/21** |
+| `bash scripts/test-bootstrap.sh` (زنجیره‌ی deploy، فرم shell) | **21/21** |
+| `bash scripts/test-bootstrap-mjs.sh` (فرم اصلی: NODE_OPTIONS + بوت **آفلاین** از کش) | **27/27** |
 
 تست‌ها یک **باگ واقعی** پیدا کردن: `front.js` هدر رو با `end()` می‌فرستاد و بدنه رو بعدش
 با `write()` → بدنه بی‌صدا دور ریخته می‌شد و `/__sub` خالی برمی‌گشت. درست شد.
@@ -152,7 +155,8 @@ scripts/bootstrap-cmd.sh   رشته‌ی دقیق Command برای paste کرد�
 scripts/lint-config.js     ۲۶ بررسی استاتیک روی کانفیگ
 scripts/test-front.js      ۳۴ تست روی روتر
 scripts/test-bootstrap.sh  ۲۱ تست روی زنجیره‌ی deploy
-scripts/test-all.sh        هر سه تا
+scripts/test-all.sh        هر چهار تا
+scripts/test-bootstrap-mjs.sh  ۲۷ تست روی فرم اصلی deploy (NODE_OPTIONS + بوت آفلاین)
 scripts/verify.sh          پروتکل §5 (روی هر ماشینی)
 scripts/check-endpoint.sh  سلامت تونل: ۴۰۴/۴۰۰/۱۰۱ + IPهای تمیز
 scripts/make-link.sh       هاست → vless:// + سابسکریپشن base64
