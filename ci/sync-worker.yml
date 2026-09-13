@@ -1,0 +1,62 @@
+name: sync-worker
+
+# Pulls the current BPB-Worker-Panel build (Plan B) into worker/worker.js so that:
+#   - you can upload it by hand in the Cloudflare dashboard, and
+#   - deploy-worker.yml can push it with wrangler.
+# Nothing is invented here: it is byte-for-byte the upstream release asset.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'BPB release tag (latest = newest)'
+        default: 'latest'
+  schedule:
+    - cron: '40 3 * * 1'   # Mondays, so you do not have to think about it
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download upstream worker.js
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ inputs.tag || 'latest' }}"
+          if [ "$TAG" = "latest" ]; then
+            TAG="$(gh api repos/bia-pain-bache/BPB-Worker-Panel/releases/latest --jq .tag_name)"
+          fi
+          echo "BPB tag: $TAG"
+          mkdir -p /tmp/w worker
+          gh release download "$TAG" -R bia-pain-bache/BPB-Worker-Panel -p 'worker.js' -D /tmp/w
+          cp /tmp/w/worker.js worker/worker.js
+          echo "$TAG" > worker/VERSION
+          {
+            echo "# BPB-Worker-Panel — vendored build"
+            echo
+            echo "- upstream: https://github.com/bia-pain-bache/BPB-Worker-Panel"
+            echo "- tag: \`$TAG\`"
+            echo "- synced: $(date -u +%FT%TZ) by \`.github/workflows/sync-worker.yml\`"
+            echo "- sha256: \`$(sha256sum worker/worker.js | cut -d' ' -f1)\`"
+            echo
+            echo "Do not edit \`worker.js\`. Re-run this workflow to update."
+          } > worker/README.md
+
+      - name: Commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add worker/
+          if git diff --cached --quiet; then
+            echo "already up to date"
+          else
+            git commit -m "worker: sync BPB-Worker-Panel $(cat worker/VERSION)"
+            git push
+            echo "committed"
+          fi

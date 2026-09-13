@@ -1,0 +1,112 @@
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "/dev/null",
+    "error": "/dev/stderr"
+  },
+  "dns": {
+    "servers": [
+      "localhost",
+      {
+        "address": "https://1.1.1.1/dns-query",
+        "port": 443,
+        "concurrency": true
+      },
+      {
+        "address": "https://8.8.8.8/dns-query",
+        "port": 443,
+        "concurrency": true
+      }
+    ],
+    "queryStrategy": "UseIPv4",
+    "disableFallbackIfMatch": true
+  },
+  "inbounds": [
+    {
+      "tag": "vless-ws-in",
+      "listen": "127.0.0.1",
+      "port": 2087,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "bac2db35-df5b-47e1-a8e1-19ecd81c1ed5",
+            "level": 0,
+            "email": "me@arena"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "path": "/cf5d72f32b82",
+          "acceptProxyProtocol": false,
+          "headers": {}
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic"],
+        "routeOnly": false
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIPv4"
+      },
+      "streamSettings": {
+        "sockopt": {
+          "tcpFastOpen": true,
+          "tcpKeepAliveIdle": 30,
+          "tcpKeepAliveInterval": 10
+        }
+      }
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "outboundTag": "blocked",
+        "ip": [
+          "0.0.0.0/8",
+          "10.0.0.0/8",
+          "100.64.0.0/10",
+          "127.0.0.0/8",
+          "169.254.0.0/16",
+          "172.16.0.0/12",
+          "192.0.0.0/24",
+          "192.0.2.0/24",
+          "192.88.99.0/24",
+          "192.168.0.0/16",
+          "198.18.0.0/15",
+          "198.51.100.0/24",
+          "203.0.113.0/24",
+          "224.0.0.0/4",
+          "240.0.0.0/4",
+          "255.255.255.255/32",
+          "::1/128",
+          "fc00::/7",
+          "fe80::/10"
+        ]
+      },
+      {
+        "type": "field",
+        "outboundTag": "blocked",
+        "protocol": ["bittorrent"]
+      }
+    ]
+  }
+}

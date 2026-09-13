@@ -1,0 +1,118 @@
+name: ip-monitor
+
+# The proof machine. Every few hours it asks your deployed container:
+#   - are you alive?            (/__health)
+#   - what egress IP do you see?(/__ip)
+#   - does the WS path still do a real handshake?  (101)
+# and appends a row to IP-LOG.md. If the IP ever changes, the row is marked and
+# the run turns red. Over a few days this file IS the evidence that the IP is
+# static and the box is always-on — not my word, a timestamped log.
+#
+# Needs the repo variable PROXY_HOST  (Settings -> Secrets and variables -> Actions
+# -> Variables -> New repository variable:  PROXY_HOST = your hostname)
+# and optionally PROXY_TOKEN (secret) if you changed PANEL_TOKEN.
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      host:
+        description: 'Hostname (blank = use the PROXY_HOST repo variable)'
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Probe
+        id: probe
+        env:
+          TOKEN: ${{ secrets.PROXY_TOKEN || 'cf5d72f32b82' }}
+        run: |
+          H="${{ inputs.host || vars.PROXY_HOST || '' }}"
+          if [ -z "$H" ]; then
+            echo "PROXY_HOST repo variable is not set — nothing to monitor yet." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "skip=1" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "skip=0" >> "$GITHUB_OUTPUT"
+          echo "host=$H" >> "$GITHUB_OUTPUT"
+          P="${WSPATH:-/cf5d72f32b82}"
+          WSKEY="$(head -c16 /dev/urandom | base64)"
+
+          HEALTH=$(curl -s --max-time 20 "https://$H/__health" || echo '{}')
+          IPJ=$(curl -s --max-time 20 "https://$H/__ip?t=$TOKEN" || echo '{}')
+          ROOT=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "https://$H/")
+          HS=$(curl -s -i --max-time 10 --http1.1 -H 'Upgrade: websocket' -H 'Connection: Upgrade' \
+                 -H "Sec-WebSocket-Key: $WSKEY" -H 'Sec-WebSocket-Version: 13' "https://$H$P" 2>/dev/null \
+               | head -n1 | awk '{print $2}')
+          case "$HS" in ''|*[!0-9]*) HS=000;; esac
+
+          IP=$(printf '%s' "$IPJ" | sed -n 's/.*"egressIP"[^"]*"\([^"]*\)".*/\1/p' | head -1)
+          jf(){ printf '%s' "$IPJ" | python3 -c "import json,sys;d=json.load(sys.stdin);print(d.get('$1','?'))" 2>/dev/null || echo '?'; }
+          CH=$(printf '%s' "$IPJ" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(len(d.get("changes",[])))' 2>/dev/null || echo '?')
+          RS=$(jf containerRestarts)
+          N=$(jf samplesCollected)
+          UP=$(jf processUptimeSec)
+
+          echo "ip=${IP:-unknown}"   >> "$GITHUB_OUTPUT"
+          echo "changes=$CH"         >> "$GITHUB_OUTPUT"
+          echo "restarts=$RS"        >> "$GITHUB_OUTPUT"
+          echo "samples=$N"          >> "$GITHUB_OUTPUT"
+          echo "handshake=$HS"       >> "$GITHUB_OUTPUT"
+          echo "root=$ROOT"          >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### ip-monitor  $(date -u +%FT%TZ)"
+            echo "| | |"
+            echo "|---|---|"
+            echo "| host | \`$H\` |"
+            echo "| egress IP | \`${IP:-unknown}\` |"
+            echo "| IP changes recorded | \`$CH\` (must stay 0) |"
+            echo "| container restarts | \`$RS\` |"
+            echo "| watchdog samples | \`$N\` |"
+            echo "| process uptime | \`$UP\`s |"
+            echo "| GET / | \`$ROOT\` (want 404) |"
+            echo "| WS handshake | \`$HS\` (want 101) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CH" != "0" ] && [ "$CH" != "?" ]; then
+            echo "::warning::EGRESS IP HAS CHANGED $CH TIME(S) — IT IS NOT STATIC"
+          fi
+          if [ "$HS" != "101" ]; then
+            echo "::error::WS handshake returned $HS — the tunnel looks DEAD"
+          fi
+
+      - name: Append to IP-LOG.md
+        if: steps.probe.outputs.skip == '0'
+        run: |
+          TS="$(date -u +%FT%TZ)"
+          F=IP-LOG.md
+          if [ ! -f "$F" ]; then
+            {
+              echo "# IP-LOG — egress IP / uptime evidence"
+              echo
+              echo "Auto-appended by \`.github/workflows/ip-monitor.yml\` every 3 hours."
+              echo "\`changes\` must stay at **0** for the IP to count as static."
+              echo
+              echo "| timestamp (UTC) | egress IP | changes | restarts | samples | GET / | WS handshake |"
+              echo "|---|---|---|---|---|---|---|"
+            } > "$F"
+          fi
+          echo "| $TS | \`${{ steps.probe.outputs.ip }}\` | ${{ steps.probe.outputs.changes }} | ${{ steps.probe.outputs.restarts }} | ${{ steps.probe.outputs.samples }} | ${{ steps.probe.outputs.root }} | ${{ steps.probe.outputs.handshake }} |" >> "$F"
+          # keep the file from growing forever
+          if [ "$(wc -l < "$F")" -gt 4000 ]; then
+            head -n 12 "$F" > "$F.tmp"; tail -n 3000 "$F" >> "$F.tmp"; mv "$F.tmp" "$F"
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$F"
+          if git diff --cached --quiet; then echo "nothing to commit"; else git commit -m "ip-monitor: $TS ip=${{ steps.probe.outputs.ip }} changes=${{ steps.probe.outputs.changes }} ws=${{ steps.probe.outputs.handshake }}"; git push; fi
